@@ -20,19 +20,23 @@ def hist_limits(dat, nlims, symmetrical = True):
         lims = [to_precision(i, 2) for i in lims]
         lims = np.unique(lims)
         if (len(lims) >= nlims0): return(lims)
-    
-    
+        
     return(lims)
 
 
 def plot_cube(cube, Ns, N, cmap):
     plt.subplot(Ns - 1, 2, N, projection=ccrs.Robinson())
-    cube = cube.collapsed('time', iris.analysis.MEAN)
+   
+    try:
+        cube = cube.collapsed('time', iris.analysis.MEAN)
+    except:
+        cube = cube.collapsed('forecast_reference_time', iris.analysis.MEAN)
     
     cmap = plt.get_cmap(cmap)
     levels = hist_limits(cube, 7)
     
     norm = BoundaryNorm(levels, ncolors=cmap.N , clip=False)
+    
     qplt.contourf(cube, levels = levels, cmap = cmap, norm = norm)
     plt.gca().coastlines()
 
