@@ -1,21 +1,15 @@
 import iris
 import numpy as np
-from   os    import listdir, getcwd, mkdir, path, walk
 from   pylab import sort
-from   pdb   import set_trace as browser
+from   pdb   import set_trace as browser        
 import matplotlib.pyplot as plt
 
-from   libs import git_info
-from   libs.plot_maps import *
-from   libs.plot_TS   import *
-from   libs.to_precision import *
+from   libs              import git_info
+from   libs.plot_maps    import *
+from   libs.plot_TS      import *
+from   libs.listdir_path import *
+from   libs.load_stash   import *
 
-def listdir_path(path):
-    from os import listdir
-    
-    files = listdir(path)
-    files = [path + i for i in files]
-    return files
 
 data_dir = 'data/'
 mod_out = 'ag589/'
@@ -29,15 +23,8 @@ soil_cmap  = 'brewer_GnBu_09'
 
 files = sort(listdir_path(data_dir + mod_out))
 
-def load_stash(code, name):
-    print code
-    stash_constraint = iris.AttributeConstraint(STASH = code)
-    cube = iris.load_cube(files, stash_constraint)
-    cube.long_name = name
-    return cube    
-
 def load_group(codes, names):
-    mod = [load_stash(code, name) for code, name in zip(codes, names)]
+    mod = [load_stash(files, code, name) for code, name in zip(codes, names)]
     
     tot = sum(mod)
     tot.long_name = 'total'   
