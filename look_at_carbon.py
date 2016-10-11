@@ -1,7 +1,6 @@
 import iris
 import numpy as np
-from   pylab import sort
-from   pdb   import set_trace as browser        
+from   pylab import sort      
 import matplotlib.pyplot as plt
 
 from   libs              import git_info
@@ -9,6 +8,8 @@ from   libs.plot_maps    import *
 from   libs.plot_TS      import *
 from   libs.listdir_path import *
 from   libs.load_stash   import *
+
+from   pdb   import set_trace as browser  
 
 
 data_dir = 'data/'
