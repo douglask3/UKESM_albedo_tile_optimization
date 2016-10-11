@@ -1,3 +1,23 @@
+#############################################################################
+## cfg                                                                     ##
+#############################################################################
+
+## General
+data_dir = 'data/'
+mod_out = 'ag589/'
+
+
+## Soils
+soil_fignm = 'soil'
+soil_title = 'SOIL CARBON POOL'
+soil_units = 'KG C / M2'
+soil_names = ['DPM', 'BIO', 'HUM']
+soil_codes = ['m01s00i466', 'm01s00i467', 'm01s00i468', 'm01s00i469']
+soil_cmap  = 'brewer_GnBu_09'
+
+#############################################################################
+## libs                                                                    ##
+#############################################################################
 import iris
 import numpy as np
 from   pylab import sort      
@@ -11,19 +31,9 @@ from   libs.load_stash   import *
 
 from   pdb   import set_trace as browser  
 
-
-data_dir = 'data/'
-mod_out = 'ag589/'
-
-soil_fignm = 'soil'
-soil_title = 'SOIL CARBON POOL'
-soil_units = 'KG C / M2'
-soil_names = ['DPM', 'BIO', 'HUM']
-soil_codes = ['m01s00i466', 'm01s00i467', 'm01s00i468', 'm01s00i469']
-soil_cmap  = 'brewer_GnBu_09'
-
-files = sort(listdir_path(data_dir + mod_out))
-
+#############################################################################
+## Funs                                                                    ##
+#############################################################################
 def load_group(codes, names):
     mod = [load_stash(files, code, name) for code, name in zip(codes, names)]
     
@@ -55,5 +65,10 @@ def open_plot_and_return(figName, codes, names, title,  units, cmap):
     plt.gcf().text(.5, .1, git)
     plt.savefig(fig_name)
 
+
+#############################################################################
+## Run                                                                     ##
+#############################################################################
+files = sort(listdir_path(data_dir + mod_out))
 open_plot_and_return(soil_fignm, soil_codes, soil_names, soil_title,  soil_units, soil_cmap)
 
