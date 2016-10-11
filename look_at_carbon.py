@@ -52,7 +52,7 @@ def open_plot_and_return(figName, codes, names, title,  units, cmap):
     dat = load_group(codes, names)
     plot_cubes(dat, title,  units, cmap)
 
-    plt.gcf().text(.6, .1, git)
+    plt.gcf().text(.5, .1, git)
     plt.savefig(fig_name)
 
 open_plot_and_return(soil_fignm, soil_codes, soil_names, soil_title,  soil_units, soil_cmap)
