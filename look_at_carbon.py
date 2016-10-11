@@ -7,7 +7,10 @@ from   pdb   import set_trace as browser
 import iris.plot as iplt
 import iris.quickplot as qplt
 import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
 import cartopy.crs as ccrs
+from   libs import git_info
 
 def listdir_path(path):
     from os import listdir
@@ -19,6 +22,7 @@ def listdir_path(path):
 data_dir = 'data/'
 mod_out = 'ag589/'
 
+soil_fignm = 'soil'
 soil_title = 'SOIL CARBON POOL'
 soil_units = 'KG C / M2'
 soil_names = ['DPM', 'BIO', 'HUM']
@@ -61,13 +65,92 @@ def plot_cube_TS(cubes, units):
     plt.grid(True)    
     plt.axis('tight')
     plt.gca().set_ylabel(units, fontsize=16)
+
+def to_precision(x,p):
+    import math
+    """
+    returns a string representation of x formatted with a precision of p
+
+    Based on the webkit javascript implementation taken from here:
+    https://code.google.com/p/webkit-mirror/source/browse/JavaScriptCore/kjs/number_object.cpp
+    """
+
+    x = float(x)
+
+    if x == 0.:
+        return 0.0
+
+    out = []
+
+    if x < 0:
+        out.append("-")
+        x = -x
+
+    e = int(math.log10(x))
+    tens = math.pow(10, e - p + 1)
+    n = math.floor(x/tens)
+
+    if n < math.pow(10, p - 1):
+        e = e -1
+        tens = math.pow(10, e - p+1)
+        n = math.floor(x / tens)
+    if abs((n + 1.) * tens - x) <= abs(n * tens -x):
+        n = n + 1
+
+    if n >= math.pow(10,p):
+        n = n / 10.
+        e = e + 1
+
+    m = "%.*g" % (p, n)
+
+    if e < -2 or e >= p:
+        out.append(m[0])
+        if p > 1:
+            out.append(".")
+            out.extend(m[1:p])
+        out.append('e')
+        if e > 0:
+            out.append("+")
+        out.append(str(e))
+    elif e == (p -1):
+        out.append(m)
+    elif e >= 0:
+        out.append(m[:e+1])
+        if e+1 < len(m):
+            out.append(".")
+            out.extend(m[e+1:])
+    else:
+        out.append("0.")
+        out.extend(["0"]*-(e+1))
+        out.append(m)
+
+    return float("".join(out))
+
+
+def hist_limits(dat, nlims, symmetrical = True):
+    nlims0 = nlims
+    for p in range(0,100 - nlims0):
+        nlims = nlims0 + p
         
+        lims = np.percentile(dat.data[~np.isnan(dat.data)], range(0, 100, 100/nlims))
+ 
+        lims = [to_precision(i, 2) for i in lims]
+        lims = np.unique(lims)
+        if (len(lims) >= nlims0): return(lims)
+    
+    
+    return(lims)
 
 def plot_cube(cube, Ns, N, cmap):
-    print N, Ns
     plt.subplot(Ns - 1, 2, N, projection=ccrs.Robinson())
     cube = cube.collapsed('time', iris.analysis.MEAN)
-    qplt.contourf(cube, 8, cmap = cmap)
+    
+    #levels = MaxNLocator(nbins=15).tick_values(cube.data.min(), cube.data.max())
+    cmap = plt.get_cmap(cmap)
+    levels = hist_limits(cube, 7)
+    
+    norm = BoundaryNorm(levels, ncolors=cmap.N , clip=False)
+    qplt.contourf(cube, levels = levels, cmap = cmap, norm = norm)
     plt.gca().coastlines()
 
 
@@ -89,11 +172,16 @@ def plot_cubes(cubes, title, units, *args):
     
     plt.gcf().suptitle(title, fontsize=18, fontweight='bold')
  
+def open_plot_and_return(figName, codes, names, title,  units, cmap):
+    fig_name = 'figs/' + figName + '.pdf'
+    git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
+    plt.figure(figsize = (12, 12))
 
-fig_name = 'figs/' + 'yay.pdf'
-plt.figure(figsize = (12, 12))
+    dat = load_group(codes, names)
+    plot_cubes(dat, title,  units, cmap)
 
-soil = load_group(soil_codes, soil_names)
-plot_cubes(soil, soil_title,  soil_units, soil_cmap)
+    plt.gcf().text(.6, .1, git)
+    plt.savefig(fig_name)
 
-plt.savefig(fig_name)
+open_plot_and_return(soil_fignm, soil_codes, soil_names, soil_title,  soil_units, soil_cmap)
+
