@@ -19,7 +19,15 @@ def hist_limits(dat, nlims, symmetrical = True):
         
         lims = [to_precision(i, 2) for i in lims]
         lims = np.unique(lims)
-        if (len(lims) >= nlims0): return(lims)
+        if (len(lims) >= nlims0): break
+   
+    if (lims[0] < 0.0):        
+        if (sum(lims <0.0) > sum(lims >0.0)):
+            lims = lims[lims < 0.0]
+            lims = np.concatenate((lims,-lims[::-1]))  
+        else:
+            lims = lims[lims > 0.0]
+            lims = np.concatenate((-lims[::-1],lims))     
         
     return(lims)
 
@@ -35,18 +43,25 @@ def plot_cube(cube, Ns, N, cmap):
     cmap = plt.get_cmap(cmap)
     levels = hist_limits(cube, 7)
     
-    norm = BoundaryNorm(levels, ncolors=cmap.N , clip=False)
+    norm = BoundaryNorm(levels, ncolors=cmap.N )
     
     qplt.contourf(cube, levels = levels, cmap = cmap, norm = norm)
     plt.gca().coastlines()
 
 
-def plot_cubes_map(cubes, *args):
+def plot_cubes_map(cubes, cmap, *args):
     nplots = len(cubes)
     for i in range(0, nplots - 1): 
         print i 
-        plot_cube(cubes[i], nplots, i * 2 + 1, *args)
+        
+        if (type(cmap) is str):
+            plot_cube(cubes[i], nplots, i * 2 + 1, cmap, *args)
+        else: 
+            plot_cube(cubes[i], nplots, i * 2 + 1, cmap[i], *args)
     
-    plot_cube(cubes[i + 1], nplots, 2, *args)
+    if (type(cmap) is str):
+        plot_cube(cubes[i + 1], nplots, 2, cmap, *args)
+    else:        
+        plot_cube(cubes[i + 1], nplots, 2, cmap[i+1], *args)
 
 

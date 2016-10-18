@@ -9,15 +9,17 @@ mod_out = 'ag589/'
 
 ## Soils
 soil_fignm = 'soil'
-soil_title = 'SOIL CARBON POOL'
+soil_title = 'SOIL_CARBON_POOL'
 soil_units = 'kg m-2'
-soil_names = ['DPM', 'RPM', 'BIO', 'HUM']
-soil_codes = ['m01s00i466', 'm01s00i467', 'm01s00i468', 'm01s00i469']
+soil_names = ['DPM', 'RPM', 'BIO', 'HUM', 'VEGC']
+soil_codes = ['m01s00i466', 'm01s00i467', 'm01s00i468', 'm01s00i469', 'm01s19i002']
 soil_cmap  = 'brewer_GnBu_09'
+
+section 
 
 ## Wood Prod Pools
 Wood_fignm = 'woodProd'
-Wood_title = 'WOOD PRODUCT'
+Wood_title = 'WOOD_PRODUCT'
 Wood_units = 'kg m-2'
 Wood_names = ['FAST', 'MEDIUM', 'SLOW']
 Wood_codes = ['m01s00i287', 'm01s00i288', 'm01s00i289']
@@ -28,9 +30,11 @@ Flux_fignm = 'Fluxes'
 Flux_title = 'FLUXES'
 Flux_units = 'kg m-2 s-1'
 Flux_names = ['NPP', 'Resp', 'Wood_prod']
+Flux_dirct = ['in' , 'out',  'out']
 Flux_codes = ['m01s03i262', 'm01s03i293', 'm01s19i042']
-Flux_cmap  = 'brewer_BuPu_09'
+Flux_cmap  = 'brewer_BrBG_11'
 
+# uag 745
 #############################################################################
 ## libs                                                                    ##
 #############################################################################
@@ -50,17 +54,28 @@ from   pdb   import set_trace as browser
 #############################################################################
 ## Funs                                                                    ##
 #############################################################################
-def load_group(codes, names, **kw):
-    mod = [load_stash(files, code, name, **kw) for code, name in zip(codes, names)]
-    
-    tot = mod[0].copy()
-    for i in mod[1:]: tot.data += i.data
-    
+def load_group(codes, names, dat = None, dirct = None, **kw):
+    if (dat is None):
+        dat = [load_stash(files, code, name, **kw) for code, name in zip(codes, names)]
+    browser()
+    tot = dat[0].copy()
+    if (dirct is None):        
+        for i in dat[1:]: tot.data += i.data
+    else:
+        if (dirct[1] != 'in'):
+            tot.data = -tot.data
+        
+        for i in range(1, len(dat)):
+            if (dirct[i] == 'in'):
+                tot.data += dat[i].data
+            else:
+                tot.data -= dat[i].data
+
     tot.var_name  = 'total'
     tot.long_name = 'total'   
-    mod.append(tot)
+    dat.append(tot)
     
-    return mod
+    return dat
 
 
 def plot_cubes(cubes, title, *args):
@@ -73,17 +88,22 @@ def plot_cubes(cubes, title, *args):
     
     plt.gcf().suptitle(title, fontsize=18, fontweight='bold')
  
-def open_plot_and_return(figName, codes, names, title,  units, cmap):
+def open_plot_and_return(figName, title,
+                         codes = None, names = None,  units  = None,
+                         cmap = 'brewer_Greys_09', **kw):
     fig_name = 'figs/' + figName + '.pdf'
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
     
-    dat = load_group(codes, names, units = units)
+    dat = load_group(codes, names, units = units, **kw)
     
-    plt.figure(figsize = (12, 4 * (len(dat) - 1)))
+    plt.figure(figsize = (15, 5 * (len(dat) - 1)))
     plot_cubes(dat, title, cmap)
 
     plt.gcf().text(.5, .1, git)
     plt.savefig(fig_name)
+    
+    dat[-1].long_name = title
+    
     return dat[-1]
 
 
@@ -91,7 +111,21 @@ def open_plot_and_return(figName, codes, names, title,  units, cmap):
 ## Run                                                                     ##
 #############################################################################
 files = sort(listdir_path(data_dir + mod_out))
-soil = open_plot_and_return(soil_fignm, soil_codes, soil_names, soil_title,  soil_units, soil_cmap)
-wood = open_plot_and_return(Wood_fignm, Wood_codes, Wood_names, Wood_title,  Wood_units, Wood_cmap)
-flux = open_plot_and_return(Flux_fignm, Flux_codes, Flux_names, Flux_title,  Flux_units, Flux_cmap)
+soil = open_plot_and_return(soil_fignm, soil_title, soil_codes, soil_names,  soil_units, soil_cmap)
 
+wood = open_plot_and_return(Wood_fignm, Wood_title, Wood_codes, Wood_names,  Wood_units, Wood_cmap)
+flux = open_plot_and_return(Flux_fignm, Flux_title, Flux_codes, Flux_names,  Flux_units, Flux_cmap, dirct = Flux_dirct)
+
+def deltaT(cubes):
+    for i in range(cubes.coord('time').shape[0] -1 , 0 , -1): cubes.data[i] -= cubes.data[i - 1]
+    cubes.data[0] -= cubes.data[0]
+    return cubes
+
+soil = deltaT(soil)
+wood = deltaT(wood)
+
+flux.data[0] -= flux.data[0]
+
+cmap = ['brewer_RdYlBu_11', 'brewer_PuOr_11', Flux_cmap, 'brewer_RdYlBu_11']
+
+open_plot_and_return('overall', 'overall', cmap = cmap, dat = [soil, wood, flux])
