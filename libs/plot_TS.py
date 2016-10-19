@@ -21,7 +21,7 @@ def plot_cube_TS(cubes):
     cubes = [cube_TS(cube) for cube in cubes]    
     
     for cube in cubes: iplt.plot(cube, label = cube.name())
-    plt.legend(ncol=2)
+    plt.legend(ncol = 2, loc = 0)
     plt.grid(True)    
     plt.axis('tight')
     
