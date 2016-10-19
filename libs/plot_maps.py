@@ -45,7 +45,7 @@ def plot_cube(cube, Ns, N, cmap):
     cmap = plt.get_cmap(cmap)
     levels, extend = hist_limits(cube, 7)
     
-    norm = BoundaryNorm(levels, ncolors=cmap.N + 1)
+    norm = BoundaryNorm(levels, ncolors=cmap.N)
     #browser()
     qplt.contourf(cube, levels = levels, cmap = cmap, norm = norm, extend = extend)
     plt.gca().coastlines()
