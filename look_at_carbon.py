@@ -28,7 +28,7 @@ Flux_fignm = 'Fluxes'
 Flux_title = 'FLUXES'
 Flux_units = 'kg m-2 s-1'
 Flux_names = ['NPP', 'Resp', 'Wood_prod']
-Flux_dirct = ['in' , 'out', 'out']
+Flux_scale = [1.0, -1.0, - 4.0 / (60.0 * 60.0 * 25.0 * 360.0)]
 Flux_codes = ['m01s03i262', 'm01s03i293', 'm01s19i042']
 Flux_cmap  = 'brewer_BrBG_11'
 
@@ -52,22 +52,15 @@ from   pdb   import set_trace as browser
 #############################################################################
 ## Funs                                                                    ##
 #############################################################################
-def load_group(codes, names, dat = None, dirct = None, **kw):
+def load_group(codes, names, dat = None, scale = None, **kw):
     if (dat is None):
         dat = [load_stash(files, code, name, **kw) for code, name in zip(codes, names)]
-    
+    dat0 = dat
+    if (scale is not None):
+        for i in range(0, len(dat)):  dat[i].data = dat[i].data * scale[i]    
+   
     tot = dat[0].copy()
-    if (dirct is None):        
-        for i in dat[1:]: tot.data += i.data
-    else:
-        if (dirct[0] != 'in'):
-            tot.data = -tot.data
-        
-        for i in range(1, len(dat)):
-            if (dirct[i] == 'in'):
-                tot.data += dat[i].data
-            else:
-                tot.data -= dat[i].data
+    for i in dat[1:]: tot.data += i.data
 
     tot.var_name  = 'total'
     tot.long_name = 'total'   
@@ -111,7 +104,8 @@ def open_plot_and_return(figName, title,
 files = sort(listdir_path(data_dir + mod_out))
 soil = open_plot_and_return(soil_fignm, soil_title, soil_codes, soil_names,  soil_units, soil_cmap)
 wood = open_plot_and_return(Wood_fignm, Wood_title, Wood_codes, Wood_names,  Wood_units, Wood_cmap)
-flux = open_plot_and_return(Flux_fignm, Flux_title, Flux_codes, Flux_names,  Flux_units, Flux_cmap, dirct = Flux_dirct)
+
+flux = open_plot_and_return(Flux_fignm, Flux_title, Flux_codes, Flux_names,  Flux_units, Flux_cmap, scale = Flux_scale)
 
 def deltaT(cubes):
     for i in range(cubes.coord('time').shape[0] -1 , 0 , -1):
