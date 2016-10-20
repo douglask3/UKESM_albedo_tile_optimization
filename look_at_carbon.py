@@ -116,7 +116,8 @@ def deltaT(cubes):
 soil = deltaT(soil)
 wood = deltaT(wood)
 
-flux.data[0] -= flux.data[0]
+flux.data[0 ] -= flux.data[0 ]
+flux.data[1:] =- flux.data[1:]
 
 cmap = ['brewer_RdYlBu_11', 'brewer_PuOr_11', Flux_cmap, 'brewer_RdYlBu_11']
 
