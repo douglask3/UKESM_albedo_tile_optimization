@@ -53,9 +53,9 @@ from   pdb   import set_trace as browser
 ## Funs                                                                    ##
 #############################################################################
 def load_group(codes, names, dat = None, scale = None, **kw):
-    if (dat is None):
+    if (dat is None):        
         dat = [load_stash(files, code, name, **kw) for code, name in zip(codes, names)]
-    dat0 = dat
+    
     if (scale is not None):
         for i in range(0, len(dat)):  dat[i].data = dat[i].data * scale[i]    
    
