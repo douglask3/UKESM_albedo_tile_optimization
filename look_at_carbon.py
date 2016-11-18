@@ -4,8 +4,7 @@
 
 ## General
 data_dir = 'data/'
-mod_out = 'ag589/'
-
+mod_out = 'ah410/'
 
 ## Soils
 soil_fignm = 'soil'
@@ -32,11 +31,14 @@ Flux_scale = [1.0, -1.0, - 4.0 / (60.0 * 60.0 * 25.0 * 360.0)]
 Flux_codes = ['m01s03i262', 'm01s03i293', 'm01s19i042']
 Flux_cmap  = 'brewer_BrBG_11'
 
-# uag 745
+
 #############################################################################
 ## libs                                                                    ##
 #############################################################################
+
+import libs.import_iris #comment out this line if not run on CEH linux box
 import iris
+
 import numpy as np
 from   pylab import sort      
 import matplotlib.pyplot as plt
