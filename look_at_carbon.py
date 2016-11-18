@@ -11,7 +11,7 @@ soil_fignm = 'soil'
 soil_title = 'SOIL_CARBON_POOL'
 soil_units = 'kg m-2'
 soil_names = ['DPM', 'RPM', 'BIO', 'HUM', 'VEGC']
-soil_codes = ['m01s00i466', 'm01s00i467', 'm01s00i468', 'm01s00i469', 'm01s19i002']
+soil_codes = ['m01s19i021', 'm01s19i022', 'm01s19i023', 'm01s19i024', 'm01s19i002']
 soil_cmap  = 'brewer_GnBu_09'
 
 ## Wood Prod Pools
@@ -104,6 +104,7 @@ def open_plot_and_return(figName, title,
 ## Run                                                                     ##
 #############################################################################
 files = sort(listdir_path(data_dir + mod_out))
+
 soil = open_plot_and_return(soil_fignm, soil_title, soil_codes, soil_names,  soil_units, soil_cmap)
 wood = open_plot_and_return(Wood_fignm, Wood_title, Wood_codes, Wood_names,  Wood_units, Wood_cmap)
 
