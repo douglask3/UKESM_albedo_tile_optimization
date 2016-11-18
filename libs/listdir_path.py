@@ -1,6 +1,4 @@
-from   os    import listdir
-
+import os
 def listdir_path(path):    
-    files = listdir(path)
-    files = [path + i for i in files]
-    return files
+    return [os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser(path)) for f in fn]
+    
