@@ -19,16 +19,17 @@ Wood_fignm = 'woodProd'
 Wood_title = 'WOOD_PRODUCT'
 Wood_units = 'kg m-2'
 Wood_names = ['FAST', 'MEDIUM', 'SLOW']
-Wood_codes = ['m01s00i287', 'm01s00i288', 'm01s00i289']
+Wood_codes = ['m01s19i032', 'm01s19i033', 'm01s19i034']
 Wood_cmap  = 'brewer_YlOrBr_09'
 
+yr2sec = 4.0 / (60.0 * 60.0 * 25.0 * 360.0)
 ## Fluxes
 Flux_fignm = 'Fluxes'
 Flux_title = 'FLUXES'
 Flux_units = 'kg m-2 s-1'
 Flux_names = ['NPP', 'Resp', 'Wood_prod']
-Flux_scale = [1.0, -1.0, - 4.0 / (60.0 * 60.0 * 25.0 * 360.0)]
-Flux_codes = ['m01s03i262', 'm01s03i293', 'm01s19i042']
+Flux_scale = [yr2sec, -yr2sec, -yr2sec]
+Flux_codes = ['m01s19i009', 'm01s19i011', 'm01s19i010']
 Flux_cmap  = 'brewer_BrBG_11'
 
 
@@ -57,6 +58,11 @@ from   pdb   import set_trace as browser
 def load_group(codes, names, dat = None, scale = None, **kw):
     if (dat is None):        
         dat = [load_stash(files, code, name, **kw) for code, name in zip(codes, names)]
+        
+       
+    for i in range(0, len(dat)):
+            if (dat[i].coords()[0].long_name == 'pseudo_level'):
+                dat[i] = dat[i].collapsed('pseudo_level', iris.analysis.MEAN)             
     
     if (scale is not None):
         for i in range(0, len(dat)):  dat[i].data = dat[i].data * scale[i]    
@@ -73,7 +79,7 @@ def load_group(codes, names, dat = None, scale = None, **kw):
 
 def plot_cubes(cubes, title, *args):
     nplots = len(cubes)
-
+    browser()
     plot_cubes_map(cubes, *args)  
     
     plt.subplot(nplots - 1, 2, 4)
