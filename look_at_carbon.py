@@ -5,6 +5,7 @@ import numpy as np
 ## General
 data_dir = 'data/'
 mod_out = 'ah410/'
+running_mean = True
 
 kg2g = 1000.0
 kgyr2gmon = 1000.0 / 12.0
@@ -95,7 +96,7 @@ def plot_cubes(cubes, title, *args):
     plot_cubes_map(cubes, *args)  
     
     plt.subplot(nplots - 1, 2, 4)
-    plot_cube_TS(cubes)      
+    plot_cube_TS(cubes, running_mean)      
     
     plt.gcf().suptitle(title, fontsize=18, fontweight='bold')
  
@@ -124,6 +125,7 @@ def open_plot_and_return(figName, title,
 files = sort(listdir_path(data_dir + mod_out))
 
 soil = open_plot_and_return(soil_fignm, soil_title, soil_codes, soil_names,  soil_units, soil_cmap, scale = soil_scale)
+
 wood = open_plot_and_return(Wood_fignm, Wood_title, Wood_codes, Wood_names,  Wood_units, Wood_cmap, scale = Wood_scale)
 wdfl = open_plot_and_return(WdFl_fignm, WdFl_title, WdFl_codes, WdFl_names,  WdFl_units, WdFl_cmap, scale = WdFl_scale)
 
@@ -132,16 +134,14 @@ flux = open_plot_and_return(Flux_fignm, Flux_title, Flux_codes, Flux_names,  Flu
 def deltaT(cubes):
     for i in range(cubes.coord('time').shape[0] -1 , 0 , -1):
         cubes.data[i] = -(cubes.data[i] - cubes.data[i - 1]) 
-    cubes.data[0] -= cubes.data[0] 
+    cubes = cubes[1:]
     return cubes
 
 soil = deltaT(soil)
 wood = deltaT(wood)
 
-flux.data[0 ] -= flux.data[0 ]
-#flux.data[1:] =- flux.data[1:]
-wdfl.data[0 ] -= wdfl.data[0 ]
-#wdfl.data[1:] =- wdfl.data[1:]
+flux = flux[1:]
+wdfl = wdfl[1:]
 
 cmap = ['brewer_RdYlBu_11', 'brewer_PuOr_11', Flux_cmap, Flux_cmap,  'brewer_RdYlBu_11']
 
