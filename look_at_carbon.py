@@ -131,22 +131,22 @@ wdfl = open_plot_and_return(WdFl_fignm, WdFl_title, WdFl_codes, WdFl_names,  WdF
 
 flux = open_plot_and_return(Flux_fignm, Flux_title, Flux_codes, Flux_names,  Flux_units, Flux_cmap, scale = Flux_scale)
 
-def deltaT0(cubes): 
+def change_in_store(cubes): 
     cubes.data = cubes.data - cubes.data[0]
     return cubes
 
-def deltaT(cubes):
+def accumulate_flux(cubes):
     for i in range(1, cubes.coord('time').shape[0]):
         cubes.data[i] = (cubes.data[i] + cubes.data[i - 1]) 
     return cubes
 
-soil = deltaT0(soil)
-wood = deltaT0(wood)
+soil = change_in_store(soil)
+wood = change_in_store(wood)
 
 
 flux.data = -flux.data
-flux = deltaT(flux)
-wdfl = deltaT(wdfl)
+flux = accumulate_flux(flux)
+wdfl = accumulate_flux(wdfl)
 
 cmap = ['brewer_RdYlBu_11', 'brewer_PuOr_11', Flux_cmap, Flux_cmap,  'brewer_RdYlBu_11']
 
