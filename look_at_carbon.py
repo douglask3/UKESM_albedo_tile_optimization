@@ -111,7 +111,7 @@ def open_plot_and_return(figName, title,
     plt.figure(figsize = (15, 5 * (len(dat) - 1)))
     plot_cubes(dat, title, cmap)
 
-    plt.gcf().text(.5, .1, git, rotation = 90)
+    plt.gcf().text(.05, .95, git, rotation = 90)
     plt.savefig(fig_name)
     
     dat[-1].long_name = title
