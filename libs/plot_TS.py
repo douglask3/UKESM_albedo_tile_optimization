@@ -14,7 +14,7 @@ def grid_area(cube):
     return iris.analysis.cartography.area_weights(cube)    
 
 ### Running mean/Moving average
-def running_mean(l, N):
+def running_N_mean(l, N):
     sum = 0
     result = list( 0 for x in l)
 
@@ -31,13 +31,16 @@ def running_mean(l, N):
 def cube_TS(cube, running_mean = False):
     grid_areas = grid_area(cube)
     cube = cube.collapsed(['latitude', 'longitude'], iris.analysis.SUM, weights = grid_areas)
-    if (running_mean): cube.data = running_mean(cube.data, 12)
+    
+    if (running_mean): cube.data = running_N_mean(cube.data, 12)
+    cube.units = 'g C'
     return cube   
 
 def plot_cube_TS(cubes, running_mean):    
     cubes = [cube_TS(cube, running_mean) for cube in cubes]    
     
     for cube in cubes: iplt.plot(cube, label = cube.name())
+    plt.ylabel('g C')
     plt.legend(ncol = 2, loc = 0)
     plt.grid(True)    
     plt.axis('tight')
