@@ -9,6 +9,7 @@ from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
 from to_precision import *
 from pdb import set_trace as browser
+from numpy import inf
 
 def hist_limits(dat, nlims, symmetrical = True):
     nlims0 = nlims
@@ -16,7 +17,9 @@ def hist_limits(dat, nlims, symmetrical = True):
         nlims = nlims0 + p
         
         lims = np.percentile(dat.data[~np.isnan(dat.data)], range(0, 100, 100/nlims))
-        
+        #lims = lims[lims != -inf]
+        if (lims[0]==-inf): lims.pop(0)
+            
         lims = [to_precision(i, 2) for i in lims]
         lims = np.unique(lims)
         if (len(lims) >= nlims0): break
@@ -45,8 +48,11 @@ def plot_cube(cube, Ns, N, cmap):
     cmap = plt.get_cmap(cmap)
     levels, extend = hist_limits(cube, 7)
     
-    norm = BoundaryNorm(levels, ncolors=cmap.N)
-    #browser()
+    if (extend =='max'): 
+        norm = BoundaryNorm(levels, ncolors=cmap.N - 1)
+    else:
+        norm = BoundaryNorm(levels, ncolors=cmap.N)
+
     qplt.contourf(cube, levels = levels, cmap = cmap, norm = norm, extend = extend)
     plt.gca().coastlines()
 
