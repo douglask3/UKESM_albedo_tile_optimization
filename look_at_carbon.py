@@ -5,14 +5,14 @@ import numpy as np
 ## General
 data_dir = 'data/'
 mod_out = 'ah410/'
-running_mean = True
+running_mean = False
 
 kg2g = 1000.0
 kgyr2gmon = 1000.0 / 12.0
 
 ## Soils
-soil_fignm = 'soil'
-soil_title = 'SOIL_CARBON_POOL'
+soil_fignm = 'soilVeg'
+soil_title = 'SOIL_VEG_CARBON_POOL'
 soil_units = 'g m-2'
 soil_names = ['DPM'       , 'RPM'       , 'BIO'       , 'HUM'       , 'VEGC']
 soil_codes = ['m01s19i021', 'm01s19i022', 'm01s19i023', 'm01s19i024', 'm01s19i002']
@@ -111,7 +111,7 @@ def open_plot_and_return(figName, title,
     plt.figure(figsize = (15, 5 * (len(dat) - 1)))
     plot_cubes(dat, title, cmap)
 
-    plt.gcf().text(.5, .1, git)
+    plt.gcf().text(.5, .1, git, rotation = 90)
     plt.savefig(fig_name)
     
     dat[-1].long_name = title
@@ -131,18 +131,27 @@ wdfl = open_plot_and_return(WdFl_fignm, WdFl_title, WdFl_codes, WdFl_names,  WdF
 
 flux = open_plot_and_return(Flux_fignm, Flux_title, Flux_codes, Flux_names,  Flux_units, Flux_cmap, scale = Flux_scale)
 
-def deltaT(cubes):
-    for i in range(cubes.coord('time').shape[0] -1 , 0 , -1):
-        cubes.data[i] = -(cubes.data[i] - cubes.data[i - 1]) 
-    cubes = cubes[1:]
+def deltaT0(cubes): 
+    cubes.data = cubes.data - cubes.data[0]
     return cubes
 
-soil = deltaT(soil)
-wood = deltaT(wood)
+def deltaT(cubes):
+    for i in range(1, cubes.coord('time').shape[0]):
+        cubes.data[i] = (cubes.data[i] + cubes.data[i - 1]) 
+    return cubes
 
-flux = flux[1:]
-wdfl = wdfl[1:]
+soil = deltaT0(soil)
+wood = deltaT0(wood)
+
+
+flux.data = -flux.data
+flux = deltaT(flux)
+wdfl = deltaT(wdfl)
 
 cmap = ['brewer_RdYlBu_11', 'brewer_PuOr_11', Flux_cmap, Flux_cmap,  'brewer_RdYlBu_11']
 
 open_plot_and_return('overall', 'overall', cmap = cmap, dat = [soil, wood, wdfl, flux])
+
+open_plot_and_return('SoilVegAndFluxes', 'Soil and fluxes',
+                     cmap = ['brewer_RdYlBu_11', Flux_cmap, 'brewer_RdYlBu_11'], 
+                     dat = [soil,flux])
