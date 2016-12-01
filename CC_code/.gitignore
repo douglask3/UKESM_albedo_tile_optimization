@@ -1,0 +1,6 @@
+data/*
+figs/*
+
+
+*.swp
+*.pyc
