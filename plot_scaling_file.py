@@ -11,7 +11,7 @@ import cartopy.crs as ccrs
 
 data_dir = 'data/'
 mod_out = 'ag589/'
-stash_code = 'm01s00i216'
+stash_code = 'm01s00i289'
 
 albedo_file = 'qrclim.land'
 albedo_index = 0
@@ -34,7 +34,7 @@ def define_axes():
 mod_files = sort(listdir_path(data_dir + mod_out))
 stash_contraint = iris.AttributeConstraint(STASH = stash_code)
 mod = iris.load_cube(mod_files, stash_contraint)
-
+browser()
 ## Seasonal tile
 
 ## Seaonal grid cell
