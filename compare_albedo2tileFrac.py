@@ -29,14 +29,18 @@ tile_n = tile_f.coord('pseudo_level').points
 tile_n = [tile_nme[tile_lev == i][0] for i in tile_f.coord('pseudo_level').points]
 
 for i in range(0, len(albedos)):
-    albedo = albedos[i].collapsed('time', iris.analysis.MEAN)
+    albedo = albedos[i]#.collapsed('time', iris.analysis.MEAN)
+    
 
     plt.figure(figsize = (15, 15))
     for tile in range(0, tile_f.shape[0]):
         plt.subplot(5,4,tile +1)
         plt.xlim(0.0, 1.0)
         plt.ylim(0.0, 1.0)
-        f = plt.plot(tile_f[tile].data[:], albedo.data[:], "ko")
+        
+        for month in range(0,albedo.shape[0]):
+            plt.plot(tile_f[tile].data[:], albedo[month].data[:], "ko")
+
         plt.grid(True)
         plt.text(0.5, 0.87, tile_n[tile],
                  horizontalalignment = 'center', fontsize = 20)
