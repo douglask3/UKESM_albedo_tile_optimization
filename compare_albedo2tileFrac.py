@@ -19,7 +19,7 @@ albedo_index = 0
 tile_lev = np.array([101  ,102       ,103       ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,402  ,501  ,502  ,6      ,7     ,8          ,9    , 901  ,902   ,903   ,904   ,905   ,906   ,907   ,908   ,909   ,910])
 tile_nme = np.array(['BLD','BLE_Trop','BLE_Temp','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice', 'Ice1','Ice2','Ice3','Ice4','Ice5','Ice6','Ice7','Ice8','Ice9','Ice10'])
 
-albedo_n = ['243', '244', '245']
+albedo_n = ['SW', 'VIS', 'NIR']
 
 ## Load data
 albedos = iris.load(data_dir + albedo_file)
