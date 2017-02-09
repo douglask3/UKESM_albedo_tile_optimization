@@ -1,7 +1,9 @@
 from __future__ import print_function
-
+import libs.import_iris
 import iris
 from libs import git_info
+from libs.load_stash import *
+from libs.listdir_path import *
 import numpy as np
 from   os    import listdir, getcwd, mkdir, path, walk
 from   pylab import sort
@@ -20,6 +22,7 @@ from statsmodels import graphics
 data_dir = 'data/'
 
 albedo_file = 'qrclim.land'
+alb_sc_path = 'data/u-aj523/'
 tile_f_file = 'JULES-ES.1p5.vn4.6.S3.dump.19900101.0.n96e_ORCA025.m01s00i216.anc'
 albedo_index = 0
 
@@ -29,14 +32,23 @@ tile_nme = np.array(['BLD','BLE_Trop','BLE_Temp','NLD','NLE','C3G','C3C','C3P','
 albedo_n = ['SW', 'VIS', 'NIR']
 
 ## Load data
-albedos = iris.load(data_dir + albedo_file)[0]
+obs_alb = iris.load(data_dir + albedo_file)[1]
 tile_f  = iris.load(data_dir + tile_f_file)[0]
 
+## Load mod albedo scaling
+mod_albi = load_stash(listdir_path(alb_sc_path), 'm01s01i271', 'VIS')
+mod_alb = mod_albi[0][0].copy()
 
-albedo = albedos.collapsed('time', iris.analysis.MEAN)
+for lev in range(0,mod_albi.shape[0]):
+    for t in range(0,obs_alb.shape[0]):
+        mod_alb.data = mod_alb.data +  mod_albi[lev][t].data * tile_f[lev].data * obs_alb[t].data / 12.0
 
-ncell = albedo.shape[0] * albedo.shape[1]
-dep = albedo.data.reshape(ncell)
+
+
+obs_alb = obs_alb.collapsed('time', iris.analysis.MEAN)
+
+ncell = obs_alb.shape[0] * obs_alb.shape[1]
+dep = obs_alb.data.reshape(ncell)
 ind = tile_f.data.reshape(17, ncell).transpose()
 
 
@@ -91,8 +103,8 @@ def plot_map(dat, plotN):
     plt.gca().coastlines()
 
 
-mod = albedo.copy()
-obs = albedo.copy()
+mod = obs_alb.copy()
+obs = obs_alb.copy()
 mod.data = res.predict().reshape(mod.shape)
 obs.long_name = 'Observed'
 mod.long_name = 'Reconstructed'
