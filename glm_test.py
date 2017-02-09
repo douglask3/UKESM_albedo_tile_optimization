@@ -12,6 +12,7 @@ from   pdb   import set_trace as browser
 import iris.plot as iplt
 import iris.quickplot as qplt
 import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
 import cartopy.crs as ccrs
 
 import statsmodels.api as sm
@@ -19,6 +20,10 @@ from scipy import stats
 from statsmodels.graphics.api import abline_plot
 from statsmodels import graphics
 
+
+##########################################################################
+## cfg                                                                  ##
+##########################################################################
 data_dir = 'data/'
 
 albedo_file = 'qrclim.land'
@@ -31,38 +36,50 @@ tile_nme = np.array(['BLD','BLE_Trop','BLE_Temp','NLD','NLE','C3G','C3C','C3P','
 
 albedo_n = ['SW', 'VIS', 'NIR']
 
-## Load data
+##########################################################################
+## Load data                                                            ##
+##########################################################################
 obs_alb = iris.load(data_dir + albedo_file)[1]
 tile_f  = iris.load(data_dir + tile_f_file)[0]
 
 ## Load mod albedo scaling
 mod_albi = load_stash(listdir_path(alb_sc_path), 'm01s01i271', 'VIS')
+
+
+##########################################################################
+## Construct required data                                              ##
+##########################################################################
 mod_alb = mod_albi[0][0].copy()
 
 for lev in range(0,mod_albi.shape[0]):
     for t in range(0,obs_alb.shape[0]):
-        mod_alb.data = mod_alb.data +  mod_albi[lev][t].data * tile_f[lev].data * obs_alb[t].data / 12.0
+        mod_alb.data = mod_alb.data +  mod_albi[lev][t].data * tile_f[lev].data * obs_alb[t].data 
 
-
-
+mod_alb = mod_alb / 12.0
 obs_alb = obs_alb.collapsed('time', iris.analysis.MEAN)
 
+##########################################################################
+## Perform glm                                                          ##
+##########################################################################
 ncell = obs_alb.shape[0] * obs_alb.shape[1]
 dep = obs_alb.data.reshape(ncell)
+
+
+tot = tile_f.collapsed('pseudo_level', iris.analysis.SUM)
+for i in range(0, tile_f.shape[0]): tile_f[i].data = tile_f[i].data / tot.data
+
 ind = tile_f.data.reshape(17, ncell).transpose()
-
-
 glm_norm = sm.GLM(dep, ind)
-
 res = glm_norm.fit()
+
 print(res.summary())
-
-
 print('Parameters: ', res.params)
 print('T-values: ', res.tvalues)
 
 
-
+##########################################################################
+## plot    glm                                                          ##
+##########################################################################
 nobs = res.nobs
 y = dep
 yhat = res.mu
@@ -92,68 +109,61 @@ resid_std = stats.zscore(resid)
 ax.hist(resid_std, bins=25)
 ax.set_title('Histogram of standardized deviance residuals');
 
+git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
+plt.gcf().text(.5, .05, git)
+plt.savefig('figs/glm_construction.png', bbox_inches = 'tight')
 
-#ax = plt.subplot(324)
-#ax.graphics.gofplots.qqplot(resid, line='r')
+graphics.gofplots.qqplot(resid, line='r')
 
+git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
+plt.gcf().text(.5, .05, git)
+plt.savefig('figs/qqplot.png', bbox_inches = 'tight')
+
+
+##########################################################################
+## plot obs, mod, glm                                                   ##
+##########################################################################
 ## Annual grid cel avarage
 def plot_map(dat, plotN):
     plt.subplot(3, 2, plotN, projection=ccrs.Robinson())
     qplt.contourf(dat, levels =[0, 0.1, 0.15, 0.2, .25, 0.3], cmap = "brewer_Greys_09")
     plt.gca().coastlines()
 
+def plot_cube(cube, N, M, n, levels = [0, 0.1, 0.15, 0.2, .25, 0.3], cmap = 'brewer_Greys_09'):
+    plt.subplot(N, M, n, projection=ccrs.Robinson())
 
-mod = obs_alb.copy()
-obs = obs_alb.copy()
-mod.data = res.predict().reshape(mod.shape)
-obs.long_name = 'Observed'
-mod.long_name = 'Reconstructed'
-plot_map(obs, 5)
-plot_map(mod, 6)
+    cmap = plt.get_cmap(cmap)
+    norm = BoundaryNorm(levels, ncolors=cmap.N - 1)
 
-plt.show()
-browser()
+    qplt.contourf(cube,levels = levels,  cmap = cmap, norm = norm, extend = 'max')
+    plt.gca().coastlines() 
+
+glm_alb = obs_alb.copy()
+
+glm_alb.data = res.predict().reshape(glm_alb.shape)
+obs_alb.long_name = 'Observed'
+mod_alb.long_name = 'Modelled'
+glm_alb.long_name = 'Reconstructed'
+plot_cube(obs_alb, 3, 2, 1)
+plot_cube(mod_alb, 3, 2, 3)
+plot_cube(glm_alb, 3, 2, 4)
+
+plt.subplot(3, 2, 5)
+plt.xlim(0.0, 1.0)
+plt.ylim(0.0, 1.0)
+plt.plot(obs_alb.data, mod_alb.data, 'ko')
+
+plt.subplot(3, 2, 6)
+plt.xlim(0.0, 1.0)
+plt.ylim(0.0, 1.0)
+plt.plot(obs_alb.data, glm_alb.data, 'ko')
+
+git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
+plt.gcf().text(.7, .95, git)
+plt.savefig('figs/albedo_recon_comparison_.png', bbox_inches = 'tight')
+
 
 
 tile_n = tile_f.coord('pseudo_level').points
 tile_n = [tile_nme[tile_lev == i][0] for i in tile_f.coord('pseudo_level').points]
-
-for i in range(0, len(albedos)):
-    albedo = albedos[i]#.collapsed('time', iris.analysis.MEAN)
-    
-
-    plt.figure(figsize = (15, 15))
-    for tile in range(0, tile_f.shape[0]):
-        plt.subplot(5,4,tile +1)
-        plt.xlim(0.0, 1.0)
-        plt.ylim(0.0, 1.0)
-        
-        for month in range(0,albedo.shape[0]):
-            plt.plot(tile_f[tile].data[:], albedo[month].data[:], "ko")
-
-        plt.grid(True)
-        plt.text(0.5, 0.87, tile_n[tile],
-                 horizontalalignment = 'center', fontsize = 20)
-
-        if (tile / 4 !=  tile / 4.0): plt.tick_params(labelleft   = 'off')
-        if ((tile + 1) / 4 ==  (tile + 1) / 4.0): plt.tick_params(labelright   = 'on')
-
-        if (tile < 4): plt.tick_params(labeltop   = 'on')
-        if (tile < (17 - 4)):  plt.tick_params(labelbottom = 'off')
-    
-    plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.07,
-                        wspace=0.09)
-    git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
-    plt.gcf().text(.5, .05, git)
-
-    
-    plt.gcf().text(.06, .5, albedo_n[i] + ' albedo', rotation = 90,
-                   verticalalignment = 'center', fontsize = 18)
-    
-    plt.gcf().text(.5, .22, 'tile fractional cover',
-                   horizontalalignment = 'center', fontsize = 18)
-    fname = 'figs/albedo_' + albedo_n[i] +'.png'
-    plt.savefig(fname, bbox_inches = 'tight')
-    
-
 
