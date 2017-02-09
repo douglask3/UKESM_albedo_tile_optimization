@@ -119,7 +119,7 @@ git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
 plt.gcf().text(.5, .05, git)
 plt.savefig('figs/qqplot.png', bbox_inches = 'tight')
 
-
+plt.close()
 ##########################################################################
 ## plot obs, mod, glm                                                   ##
 ##########################################################################
@@ -158,8 +158,9 @@ plt.xlim(0.0, 1.0)
 plt.ylim(0.0, 1.0)
 plt.plot(obs_alb.data, glm_alb.data, 'ko')
 
+
 git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
-plt.gcf().text(.7, .95, git)
+plt.gcf().text(.5, .8, git)
 plt.savefig('figs/albedo_recon_comparison_.png', bbox_inches = 'tight')
 
 
