@@ -68,24 +68,25 @@ def weight_array(ar, wts):
                 weighted.append(i[0])
         return weighted
 
-def weightedBoxplot(data, weights = None, minW = 0.001, *args, **kw):
-    if (weights is None): return(plt.boxplot(data, *args, **kw))
-
+def weightedBoxplot(data, weights = None, minW = 0.1, *args, **kw):
+    yay = data
     def sampleDat(dat, weight):
         weight[weight < minW] = 0.0
         weight = (weight / minW)
         weight = np.around(weight)
         weight = weight.astype(int)
         return(weight_array(dat, weight))
+    if (weights is not None):
+        data = [sampleDat(d, w) for d, w in zip(data, weights)]
 
-    data = [sampleDat(d, w) for d, w in zip(data, weights)]
-    return(plt.boxplot(data, *args, **kw))
+    return plt.boxplot(data, *args, **kw), data
 
 def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
     fig = plt.subplot(N, 1, n)
+
     plt.subplots_adjust(left=0.075, right=0.95, top=0.9, bottom=0.25)
 
-    bp = weightedBoxplot(dat, weights, notch=0, sym='+', vert=1, whis=1.5)
+    bp, dat = weightedBoxplot(dat, weights, notch=0, sym='+', vert=1, whis=1.5)
     ax1 = plt.gca()
 
     plt.setp(bp['boxes'], color='black')
@@ -98,7 +99,7 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
                    alpha=0.5)
 
     
-# Hide these grid behind plot objects
+    # Hide these grid behind plot objects
     ax1.set_axisbelow(True)
     ax1.set_title(title)
     ax1.set_xlabel(' ')
@@ -107,13 +108,17 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
     # Set the axes ranges and axes labels
     ax1.set_ylim(0, maxy)
     if xlab: 
-        mn = [i.mean() for i in dat]
-        labs = [i + ' - ' +str(j) for i,j in zip(tile_nme, mn)]
-        xtickNames = plt.setp(ax1, xticklabels = labs)
+        mn = [np.around(np.mean(i), decimals = 2) for i in dat]
+        sd = [np.around(np.std (i), decimals = 2) for i in dat]
+        labs = [i + '\n' + str(j) + '\n' + str(k) for i, j, k in zip(tile_nme, mn, sd)]
+        labs = [' \nMean\nStd'] + labs 
+        plt.xticks(range(0, len(labs)), labs, fontsize = 8) 
     else:        
-        xtickNames = plt.setp(ax1, xticklabels = np.repeat('', len(tile_nme)))
+        labs = np.repeat('', len(tile_nme) + 1)
 
-    plt.setp(xtickNames, rotation=45, fontsize=8)
+    #xtickNames = plt.setp(ax1, xticklabels = labs)
+    #plt.setp(xtickNames, fontsize=8)
+    return dat
 
 
 for var, code in zip(var_name, stashCde):
@@ -133,7 +138,7 @@ for var, code in zip(var_name, stashCde):
             ww = np.tile(weights[i].data.data.flatten(),dats[i].shape[0])
         except:
             ww = np.tile(weights[i].data.flatten(),dats[i].shape[0])
-        msk = dd >= 0.0# and w => 0.0 for d, w in zip(dd, ww)]
+        msk = dd >= 0.0
         
         dd = dd[msk]
         ww = ww[msk]
@@ -141,9 +146,6 @@ for var, code in zip(var_name, stashCde):
         
         dat.append(dd)
         w = weights[i].data.data
-        #w = np.ma.masked_array(weights[i].data, dats[i].data[0].mask)
-        #if (tile == 301): browser()
-        #w = np.tile(w.compressed(),dats[i].shape[0])
         
         weight.append(ww)
         
