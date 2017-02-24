@@ -112,12 +112,8 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
         sd = [np.around(np.std (i), decimals = 2) for i in dat]
         labs = [i + '\n' + str(j) + '\n' + str(k) for i, j, k in zip(tile_nme, mn, sd)]
         labs = [' \nMean\nStd'] + labs 
-        plt.xticks(range(0, len(labs)), labs, fontsize = 8) 
-    else:        
-        labs = np.repeat('', len(tile_nme) + 1)
+        plt.xticks(range(0, len(labs)), labs, fontsize = 8)  
 
-    #xtickNames = plt.setp(ax1, xticklabels = labs)
-    #plt.setp(xtickNames, fontsize=8)
     return dat
 
 
