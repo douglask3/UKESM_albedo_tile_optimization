@@ -43,7 +43,7 @@ def weight_array(ar, wts):
                 weighted.append(i[0])
         return weighted
 
-def weightedBoxplot(data, weights = None, minW = 0.0001, *args, **kw):
+def weightedBoxplot(data, weights = None, minW = 0.001, *args, **kw):
     def sampleDat(dat, weight):
         weight[weight < minW] = 0.0
         weight = (weight / minW)
@@ -129,9 +129,9 @@ for var, code in zip(var_name, stashCde):
     plotBox(dat, None  , 4, 2, title = 'Zoomed in None-weighted tile albedo scaling',
             maxy = 2)
     
-    plotBox(dat, weight, 4, 3, title = 'Weighted tile albedo scaling',
+    dat = plotBox(dat, weight, 4, 3, title = 'Weighted tile albedo scaling',
             maxy = None)
-    plotBox(dat, weight, 4, 4, title = 'Zoomed in weighted tile albedo scaling',
+    plotBox(dat, None, 4, 4, title = 'Zoomed in weighted tile albedo scaling',
             maxy = 2, xlab = True)
     
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
