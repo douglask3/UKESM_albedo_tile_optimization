@@ -29,6 +29,12 @@ files    = sort(listdir_path(data_dir))
 def which(a, b):
     return([i for i in range(0, len(a)) if a[i] == b])
 
+def grid_area(cube):
+    if cube.coord('latitude').bounds is None:
+        cube.coord('latitude').guess_bounds()
+        cube.coord('longitude').guess_bounds()
+    return iris.analysis.cartography.area_weights(cube)
+
 def weight_array(ar, wts):
         zipped = zip(ar, wts)
         weighted = []
@@ -86,25 +92,30 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
     return dat
 
 
+
 for var, code in zip(var_name, stashCde):
     stash_constraint = iris.AttributeConstraint(STASH = 'm01s01i270')
-    dats    = iris.load_cube(files, stash_constraint)
-    weights = iris.load_cube(tileFrac_file)
+    dats     = iris.load_cube(files, stash_constraint)
+    weights  = iris.load_cube(tileFrac_file)
 
-    cTiles  = dats.coords('pseudo_level')[0].points
-    dat     = []
-    weight  = []
+    cTiles   = dats.coords('pseudo_level')[0].points
+    dat      = []
+    weight   = []
+    gridArea = grid_area(weights[0])
+    gridArea = gridArea / gridArea.max()
     for tile in tile_lev:
         print(tile)
         i = which(cTiles, tile)[0]
         
         dd = dats[i].data.data.flatten()
+
+        ww = weights[i].data * gridArea
         try:
-            ww = np.tile(weights[i].data.data.flatten(),dats[i].shape[0])
+            ww = np.tile(ww.data.flatten(),dats[i].shape[0])
         except:
-            ww = np.tile(weights[i].data.flatten(),dats[i].shape[0])
-        msk = dd >= 0.0
-        
+            ww = np.tile(ww.flatten(),dats[i].shape[0])
+
+        msk = dd >= 0.0        
         dd = dd[msk]
         ww = ww[msk]
         
