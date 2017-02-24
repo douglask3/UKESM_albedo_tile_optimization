@@ -18,7 +18,7 @@ tileFrac_file = 'data/N96e_GA7_17_tile_cci_reorder.anc'
 
 tile_lev = np.array([101  ,102       ,103       ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,
                      402  ,501  ,502  ,6      ,7     ,8          ,9])
-tile_nme = np.array(['BLD','BLE_Trop','BLE_Temp','NLD','NLE','C3G','C3C','C3P','C4G','C4C',
+tile_nme = np.array(['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C',
                      'C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice'])
 
 var_name = ['VIS', 'NIR']
@@ -79,7 +79,9 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
         sd = [np.around(np.std (i), decimals = 2) for i in dat]
         labs = [i + '\n' + str(j) + '\n' + str(k) for i, j, k in zip(tile_nme, mn, sd)]
         labs = [' \nMean\nStd'] + labs 
-        plt.xticks(range(0, len(labs)), labs, fontsize = 8)  
+    else:
+        labs = np.repeat('', len(tile_nme))
+    plt.xticks(range(0, len(labs)), labs, fontsize = 8)  
 
     return dat
 
@@ -108,8 +110,9 @@ for var, code in zip(var_name, stashCde):
         
         dat.append(dd)        
         weight.append(ww)
-        
     
+    plt.figure(figsize = (8, 12))
+
     plotBox(dat, None  , 4, 1, title = 'None-weighted tile albedo scaling',
             maxy = None)
     plotBox(dat, None  , 4, 2, title = 'Zoomed in None-weighted tile albedo scaling',
@@ -121,7 +124,7 @@ for var, code in zip(var_name, stashCde):
             maxy = 2, xlab = True)
     
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
-    plt.gcf().text(.05, .05, git, fontsize = 8)
+    plt.gcf().text(.05, .18, git, fontsize = 8)
     fname = 'figs/' + var + 'meanVar' + '.png'
     plt.savefig(fname, bbox_inches = 'tight')
     
