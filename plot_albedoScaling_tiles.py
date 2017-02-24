@@ -43,7 +43,7 @@ def weight_array(ar, wts):
                 weighted.append(i[0])
         return weighted
 
-def weightedBoxplot(data, weights = None, minW = 0.1, *args, **kw):
+def weightedBoxplot(data, weights = None, minW = 0.0001, *args, **kw):
     def sampleDat(dat, weight):
         weight[weight < minW] = 0.0
         weight = (weight / minW)
