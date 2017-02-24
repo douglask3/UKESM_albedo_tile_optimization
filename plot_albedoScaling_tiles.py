@@ -12,26 +12,76 @@ import iris.quickplot as qplt
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
-data_dir = 'data/u-aj523/'
+data_dir      = 'data/u-aj523/'
+tileFrac_file = 'data/N96e_GA7_17_tile_cci_reorder.anc'
 
 
-tile_lev = np.array([101  ,102       ,103       ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,402  ,501  ,502  ,6      ,7     ,8          ,9])
-tile_nme = np.array(['BLD','BLE_Trop','BLE_Temp','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice'])
+tile_lev = np.array([101  ,102       ,103       ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,
+                     402  ,501  ,502  ,6      ,7     ,8          ,9])
+tile_nme = np.array(['BLD','BLE_Trop','BLE_Temp','NLD','NLE','C3G','C3C','C3P','C4G','C4C',
+                     'C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice'])
 
 var_name = ['VIS', 'NIR']
 stashCde = ['m01s01i270', 'm01s01i271']
 
-files = sort(listdir_path(data_dir))
+files    = sort(listdir_path(data_dir))
 
 def which(a, b):
     return([i for i in range(0, len(a)) if a[i] == b])
 
-def weightedBoxplot(dat, weights = None, *args, **kw):
-    if (weights is None): return(plt.boxplot(dat, *args, **kw))
-    browser()
-    
+def weighted_quantile(values, quantiles, sample_weight=None, values_sorted=False, old_style=False):
+    """ Very close to numpy.percentile, but supports weights.
+    NOTE: quantiles should be in [0, 1]!
+    :param values: numpy.array with data
+    :param quantiles: array-like with many quantiles needed
+    :param sample_weight: array-like of the same length as `array`
+    :param values_sorted: bool, if True, then will avoid sorting of initial array
+    :param old_style: if True, will correct output to be consistent with numpy.percentile.
+    :return: numpy.array with computed quantiles.
+    """
+    values = np.array(values)
+    quantiles = np.array(quantiles)
+    if sample_weight is None:
+        sample_weight = np.ones(len(values))
+    sample_weight = np.array(sample_weight)
+    assert np.all(quantiles >= 0) and np.all(quantiles <= 1), 'quantiles should be in [0, 1]'
 
-def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = True):
+    if not values_sorted:
+        sorter = np.argsort(values)
+        values = values[sorter]
+        sample_weight = sample_weight[sorter]
+
+    weighted_quantiles = np.cumsum(sample_weight) - 0.5 * sample_weight
+    if old_style:
+        # To be convenient with numpy.percentile
+        weighted_quantiles -= weighted_quantiles[0]
+        weighted_quantiles /= weighted_quantiles[-1]
+    else:
+        weighted_quantiles /= np.sum(sample_weight)
+    return np.interp(quantiles, weighted_quantiles, values)
+
+def weight_array(ar, wts):
+        zipped = zip(ar, wts)
+        weighted = []
+        for i in zipped:
+            for j in range(i[1]):
+                weighted.append(i[0])
+        return weighted
+
+def weightedBoxplot(data, weights = None, minW = 0.001, *args, **kw):
+    if (weights is None): return(plt.boxplot(data, *args, **kw))
+
+    def sampleDat(dat, weight):
+        weight[weight < minW] = 0.0
+        weight = (weight / minW)
+        weight = np.around(weight)
+        weight = weight.astype(int)
+        return(weight_array(dat, weight))
+
+    data = [sampleDat(d, w) for d, w in zip(data, weights)]
+    return(plt.boxplot(data, *args, **kw))
+
+def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
     fig = plt.subplot(N, 1, n)
     plt.subplots_adjust(left=0.075, right=0.95, top=0.9, bottom=0.25)
 
@@ -68,17 +118,45 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = True):
 
 for var, code in zip(var_name, stashCde):
     stash_constraint = iris.AttributeConstraint(STASH = 'm01s01i270')
-    cube = iris.load_cube(files, stash_constraint)
-    cTiles = cube.coords('pseudo_level')[0].points
-    dat = []
+    dats    = iris.load_cube(files, stash_constraint)
+    weights = iris.load_cube(tileFrac_file)
+
+    cTiles  = dats.coords('pseudo_level')[0].points
+    dat     = []
+    weight  = []
     for tile in tile_lev:
         print(tile)
         i = which(cTiles, tile)[0]
-        print(i)
-        dat.append(cube[i].data.compressed())
+        
+        dd = dats[i].data.data.flatten()
+        try:
+            ww = np.tile(weights[i].data.data.flatten(),dats[i].shape[0])
+        except:
+            ww = np.tile(weights[i].data.flatten(),dats[i].shape[0])
+        msk = dd >= 0.0# and w => 0.0 for d, w in zip(dd, ww)]
+        
+        dd = dd[msk]
+        ww = ww[msk]
+        
+        
+        dat.append(dd)
+        w = weights[i].data.data
+        #w = np.ma.masked_array(weights[i].data, dats[i].data[0].mask)
+        #if (tile == 301): browser()
+        #w = np.tile(w.compressed(),dats[i].shape[0])
+        
+        weight.append(ww)
+        
     
-    plotBox(dat, None, 2, 1, title = 'None-weighted tile albedo scaling', maxy = None, xlab = False)
-    plotBox(dat, None, 2, 2, title = 'Zoomed in None-weighted tile albedo scaling', maxy = 2)
+    plotBox(dat, None  , 4, 1, title = 'None-weighted tile albedo scaling',
+            maxy = None)
+    plotBox(dat, None  , 4, 2, title = 'Zoomed in None-weighted tile albedo scaling',
+            maxy = 2)
+    
+    plotBox(dat, weight, 4, 3, title = 'Weighted tile albedo scaling',
+            maxy = None)
+    plotBox(dat, weight, 4, 4, title = 'Zoomed in weighted tile albedo scaling',
+            maxy = 2, xlab = True)
     
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
     plt.gcf().text(.05, .05, git, fontsize = 8)
