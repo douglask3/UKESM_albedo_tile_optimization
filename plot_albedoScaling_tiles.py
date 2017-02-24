@@ -29,37 +29,6 @@ files    = sort(listdir_path(data_dir))
 def which(a, b):
     return([i for i in range(0, len(a)) if a[i] == b])
 
-def weighted_quantile(values, quantiles, sample_weight=None, values_sorted=False, old_style=False):
-    """ Very close to numpy.percentile, but supports weights.
-    NOTE: quantiles should be in [0, 1]!
-    :param values: numpy.array with data
-    :param quantiles: array-like with many quantiles needed
-    :param sample_weight: array-like of the same length as `array`
-    :param values_sorted: bool, if True, then will avoid sorting of initial array
-    :param old_style: if True, will correct output to be consistent with numpy.percentile.
-    :return: numpy.array with computed quantiles.
-    """
-    values = np.array(values)
-    quantiles = np.array(quantiles)
-    if sample_weight is None:
-        sample_weight = np.ones(len(values))
-    sample_weight = np.array(sample_weight)
-    assert np.all(quantiles >= 0) and np.all(quantiles <= 1), 'quantiles should be in [0, 1]'
-
-    if not values_sorted:
-        sorter = np.argsort(values)
-        values = values[sorter]
-        sample_weight = sample_weight[sorter]
-
-    weighted_quantiles = np.cumsum(sample_weight) - 0.5 * sample_weight
-    if old_style:
-        # To be convenient with numpy.percentile
-        weighted_quantiles -= weighted_quantiles[0]
-        weighted_quantiles /= weighted_quantiles[-1]
-    else:
-        weighted_quantiles /= np.sum(sample_weight)
-    return np.interp(quantiles, weighted_quantiles, values)
-
 def weight_array(ar, wts):
         zipped = zip(ar, wts)
         weighted = []
@@ -69,7 +38,6 @@ def weight_array(ar, wts):
         return weighted
 
 def weightedBoxplot(data, weights = None, minW = 0.1, *args, **kw):
-    yay = data
     def sampleDat(dat, weight):
         weight[weight < minW] = 0.0
         weight = (weight / minW)
@@ -98,7 +66,6 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
     ax1.yaxis.grid(True, linestyle='-', which='major', color='lightgrey',
                    alpha=0.5)
 
-    
     # Hide these grid behind plot objects
     ax1.set_axisbelow(True)
     ax1.set_title(title)
@@ -139,10 +106,7 @@ for var, code in zip(var_name, stashCde):
         dd = dd[msk]
         ww = ww[msk]
         
-        
-        dat.append(dd)
-        w = weights[i].data.data
-        
+        dat.append(dd)        
         weight.append(ww)
         
     
