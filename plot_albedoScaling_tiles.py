@@ -3,6 +3,7 @@ import iris
 from libs import git_info
 from libs.listdir_path import *
 import numpy as np
+import math
 from   os    import listdir, getcwd, mkdir, path, walk
 from   pylab import sort
 from   pdb   import set_trace as browser
@@ -35,6 +36,23 @@ def grid_area(cube):
         cube.coord('longitude').guess_bounds()
     return iris.analysis.cartography.area_weights(cube)
 
+def weighted_avg_and_std(values, weights):
+    """
+    Return the weighted average and standard deviation.
+
+    values, weights -- Numpy ndarrays with the same shape.
+    """
+    try:
+        average  = np.average(values, weights = weights)
+        variance = np.average((values - average)**2, weights = weights)
+        variance = math.sqrt(variance)
+    except:
+        average = variance = float('nan')
+    
+    return(average, variance)
+
+   
+
 def weight_array(ar, wts):
         zipped = zip(ar, wts)
         weighted = []
@@ -55,7 +73,7 @@ def weightedBoxplot(data, weights = None, minW = 0.001, *args, **kw):
 
     return plt.boxplot(data, *args, **kw), data
 
-def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
+def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = None):
     fig = plt.subplot(N, 1, n)
 
     plt.subplots_adjust(left=0.075, right=0.95, top=0.9, bottom=0.25)
@@ -80,21 +98,15 @@ def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = False):
     
     # Set the axes ranges and axes labels
     ax1.set_ylim(0, maxy)
-    if xlab: 
-        mn = [np.around(np.mean(i), decimals = 2) for i in dat]
-        sd = [np.around(np.std (i), decimals = 2) for i in dat]
-        labs = [i + '\n' + str(j) + '\n' + str(k) for i, j, k in zip(tile_nme, mn, sd)]
-        labs = [' \nMean\nStd'] + labs 
-    else:
-        labs = np.repeat('', len(tile_nme))
-    plt.xticks(range(0, len(labs)), labs, fontsize = 8)  
+    if xlab is None: xlab = np.repeat('', len(tile_nme))        
+    plt.xticks(range(0, len(xlab)), xlab, fontsize = 8)  
 
     return dat
 
 
 
 for var, code in zip(var_name, stashCde):
-    stash_constraint = iris.AttributeConstraint(STASH = 'm01s01i270')
+    stash_constraint = iris.AttributeConstraint(STASH = code)
     dats     = iris.load_cube(files, stash_constraint)
     weights  = iris.load_cube(tileFrac_file)
 
@@ -118,11 +130,27 @@ for var, code in zip(var_name, stashCde):
         msk = dd >= 0.0        
         dd = dd[msk]
         ww = ww[msk]
+        ww[ww < 0.0] = 0.0
         
         dat.append(dd)        
         weight.append(ww)
     
     plt.figure(figsize = (8, 12))
+
+    mnVar = [weighted_avg_and_std(i,j) for i, j in zip(dat, weight)]
+    
+    def nanRound(vs, *args, **kw):
+        if math.isnan(vs): return(vs)
+        return(np.around(vs, *args, **kw))
+
+    
+    mvVar = [nanRound(i[0], 2) for i in mnVar]
+
+    labs = [i + '\n' + str(j[0]) + '\n' + str(j[1]) for i, j in zip(tile_nme, mnVar)]
+    labs = [' \nMean\nStd'] + labs
+
+    #mn = [np.around(np.average(i, weights = j), decimals = 2) for i, j in zip(dat, weight)]
+    #sd = [np.around(np.std (i), decimals = 2) for i in dat]
 
     plotBox(dat, None  , 4, 1, title = 'None-weighted tile albedo scaling',
             maxy = None)
@@ -132,7 +160,7 @@ for var, code in zip(var_name, stashCde):
     dat = plotBox(dat, weight, 4, 3, title = 'Weighted tile albedo scaling',
             maxy = None)
     plotBox(dat, None, 4, 4, title = 'Zoomed in weighted tile albedo scaling',
-            maxy = 2, xlab = True)
+            maxy = 2, xlab = labs)
     
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
     plt.gcf().text(.05, .18, git, fontsize = 8)
