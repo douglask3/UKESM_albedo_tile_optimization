@@ -140,12 +140,13 @@ for var, code in zip(var_name, stashCde):
     mnVar = [weighted_avg_and_std(i,j) for i, j in zip(dat, weight)]
     
     def nanRound(vs, *args, **kw):
-        if math.isnan(vs): return(vs)
-        return(np.around(vs, *args, **kw))
-
+        def fun(v):
+            if math.isnan(v): return(v)
+            return np.around(v, *args, **kw)
+        return [fun(i) for i in vs]
     
-    mvVar = [nanRound(i[0], 2) for i in mnVar]
-
+    mnVar = [nanRound(i, 2) for i in mnVar]
+    
     labs = [i + '\n' + str(j[0]) + '\n' + str(j[1]) for i, j in zip(tile_nme, mnVar)]
     labs = [' \nMean\nStd'] + labs
 
@@ -158,7 +159,7 @@ for var, code in zip(var_name, stashCde):
             maxy = 2)
     
     dat = plotBox(dat, weight, 4, 3, title = 'Weighted tile albedo scaling',
-            maxy = None)
+                  maxy = None)
     plotBox(dat, None, 4, 4, title = 'Zoomed in weighted tile albedo scaling',
             maxy = 2, xlab = labs)
     
