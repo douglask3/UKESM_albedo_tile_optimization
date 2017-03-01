@@ -1,21 +1,24 @@
 import libs.import_iris
 import iris
-from libs import git_info
-from libs.listdir_path import *
 import numpy as np
-import math
-from   os    import listdir, getcwd, mkdir, path, walk
-from   pylab import sort
-from   pdb   import set_trace as browser
 
-import iris.plot as iplt
-import iris.quickplot as qplt
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
+
+from   os                import listdir, getcwd, mkdir, path, walk
+from   pylab             import sort
+from   pdb               import set_trace as browser
+
+from   libs              import git_info
+from   libs.listdir_path import *
+from   libs.weightedFuns import *
+from   libs.which        import *
+from   libs.nanRound     import *
+from   libs.grid_area    import grid_area
+
 data_dir      = 'data/u-aj523/'
 tileFrac_file = 'data/N96e_GA7_17_tile_cci_reorder.anc'
-
 
 tile_lev = np.array([101  ,102       ,103       ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,
                      402  ,501  ,502  ,6      ,7     ,8          ,9])
@@ -27,51 +30,6 @@ stashCde = ['m01s01i270', 'm01s01i271']
 
 files    = sort(listdir_path(data_dir))
 
-def which(a, b):
-    return([i for i in range(0, len(a)) if a[i] == b])
-
-def grid_area(cube):
-    if cube.coord('latitude').bounds is None:
-        cube.coord('latitude').guess_bounds()
-        cube.coord('longitude').guess_bounds()
-    return iris.analysis.cartography.area_weights(cube)
-
-def weighted_avg_and_std(values, weights):
-    """
-    Return the weighted average and standard deviation.
-
-    values, weights -- Numpy ndarrays with the same shape.
-    """
-    try:
-        average  = np.average(values, weights = weights)
-        variance = np.average((values - average)**2, weights = weights)
-        variance = math.sqrt(variance)
-    except:
-        average = variance = float('nan')
-    
-    return(average, variance)
-
-   
-
-def weight_array(ar, wts):
-        zipped = zip(ar, wts)
-        weighted = []
-        for i in zipped:
-            for j in range(i[1]):
-                weighted.append(i[0])
-        return weighted
-
-def weightedBoxplot(data, weights = None, minW = 0.001, *args, **kw):
-    def sampleDat(dat, weight):
-        weight[weight < minW] = 0.0
-        weight = (weight / minW)
-        weight = np.around(weight)
-        weight = weight.astype(int)
-        return(weight_array(dat, weight))
-    if (weights is not None):
-        data = [sampleDat(d, w) for d, w in zip(data, weights)]
-
-    return plt.boxplot(data, *args, **kw), data
 
 def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = None):
     fig = plt.subplot(N, 1, n)
@@ -139,19 +97,12 @@ for var, code in zip(var_name, stashCde):
 
     mnVar = [weighted_avg_and_std(i,j) for i, j in zip(dat, weight)]
     
-    def nanRound(vs, *args, **kw):
-        def fun(v):
-            if math.isnan(v): return(v)
-            return np.around(v, *args, **kw)
-        return [fun(i) for i in vs]
     
     mnVar = [nanRound(i, 2) for i in mnVar]
     
     labs = [i + '\n' + str(j[0]) + '\n' + str(j[1]) for i, j in zip(tile_nme, mnVar)]
     labs = [' \nMean\nStd'] + labs
 
-    #mn = [np.around(np.average(i, weights = j), decimals = 2) for i, j in zip(dat, weight)]
-    #sd = [np.around(np.std (i), decimals = 2) for i in dat]
 
     plotBox(dat, None  , 4, 1, title = 'None-weighted tile albedo scaling',
             maxy = None)
