@@ -45,6 +45,8 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither', figName = None,
     nx = int(math.sqrt(nplts))
     ny = math.ceil(nplts / float(nx))
 
+    plt.figure(figsize = (24 + max(0, (nx - 3)/2), 12 + max(0, (ny - 3)/2)))
+
     for i in range(0, len(cubes)):         
         cmapi = cmap if (type(cmap) is str) else cmap[i]
         cf = plot_cube(cubes[i], nx + 1, ny, i + 1, cmapi, levels, extend, *args)
@@ -60,4 +62,5 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither', figName = None,
         plt.show()
     else :
         plt.savefig(figName, bbox_inches='tight')
+        plt.clf()
 
