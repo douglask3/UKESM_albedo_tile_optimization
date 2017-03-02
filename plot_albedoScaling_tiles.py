@@ -30,7 +30,6 @@ stashCde = ['m01s01i270', 'm01s01i271']
 
 files    = sort(listdir_path(data_dir))
 
-
 def plotBox(dat, weights, N, n, title = '', maxy = 2, xlab = None):
     fig = plt.subplot(N, 1, n)
 
