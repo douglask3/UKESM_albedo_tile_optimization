@@ -34,7 +34,8 @@ def plot_cube(cube, N, M, n, cmap, levels, extend):
     return cf
 
 
-def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither', figName = None, *args):
+def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
+                   figName = None, units = '', *args):
     try:
         cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except:
@@ -53,7 +54,7 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither', figName = None,
 
     colorbar_axes = plt.gcf().add_axes([0.15, 0.5 / nx, 0.7, 0.15 / nx])
     colorbar = plt.colorbar(cf, colorbar_axes, orientation='horizontal')
-    colorbar.set_label('fractional cover')
+    colorbar.set_label(units)
     
     git = 'rev:  ' + git_info.rev + '\n' + 'repo: ' + git_info.url
     plt.gcf().text(.05, .95, git, rotation = 270, verticalalignment = "top")

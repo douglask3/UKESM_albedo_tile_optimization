@@ -33,6 +33,7 @@ def max_cubes(cubes):
     def tstMax(mx, nxt):
         msk = mx.data < nxt.data
         mx.data[msk] = nxt.data[msk]
+        
         return mx
     
     mx = cubes[0]
@@ -46,11 +47,13 @@ mxLAI = max_cubes(lais)
 
 plot_cubes_map(frac, tile_nme, 'brewer_Greens_09',
                [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], 'max',
-               'figs/N96e_GA7_17_tile_cci_reorder.png')
+               'figs/N96e_GA7_17_tile_cci_reorder.png',
+               'fractional cover')
 
 plot_cubes_map(mxLAI, tile_nme, 'brewer_Greens_09',
-               [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], 'max',
-                'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png')
+               [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
+               'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
+               'LAI')
 
 
 browser()
