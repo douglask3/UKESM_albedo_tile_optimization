@@ -57,15 +57,22 @@ def reOrder(lst, idx):
 alph_inf = reOrder(alph_inf, ParaOrder)
 alph_k   = reOrder(alph_k  , ParaOrder)
 
-#plot_cubes_map(frac, tile_nme, 'brewer_Greens_09',
-#               [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], 'max',
-#               'figs/N96e_GA7_17_tile_cci_reorder.png',
-#               'fractional cover')
+def plot_cubes_map_ordered(cube, *args, **kw):
+    codes = [frac.coords('pseudo_level')[0].points[i] for i in PlotOrder]
+    cube = [cube[i] for i in PlotOrder if i < cube.shape[0]]
+    nms = [i + '-' + str(j) for i,j in zip(tile_nme, codes)]
+    plot_cubes_map(cube, nms, *args, **kw)
 
-#plot_cubes_map(mxLAI, tile_nme, 'brewer_Greens_09',
-#               [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
-#               'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
-#               'LAI')
+
+plot_cubes_map_ordered(frac, 'brewer_Greens_09',
+                       [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], 'max',
+                       'figs/N96e_GA7_17_tile_cci_reorder.png',
+                       'fractional cover')
+
+plot_cubes_map_ordered(mxLAI, 'brewer_Greens_09',
+                       [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
+                       'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
+                       'LAI')
 
 def nTilesGT(frac, x, ai, ak):
     cube = frac.copy()
