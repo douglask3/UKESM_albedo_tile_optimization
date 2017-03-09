@@ -15,20 +15,19 @@ class Albedo(object):
         self.k = k 
     
     def tile(self, tile):
-        
         lai = self.extraPseudo_level(self.lai, tile)
-        
-        k = self.k[tile]
+        k   = self.k[tile]
+        alpha_inf = self.alpha_inf[tile]
 
         alpha = self.lai[:,0,:,:].copy()
         alpha.coord('pseudo_level').points[0] = tile
         alpha.attributes = None
-        if lai is None:
-            alpha.data[:,:,:] = self.alpha_inf[tile]            
+        if lai is None:            
+            alpha.data[:,:,:] = self.alpha_0.data if alpha_inf == -1.0 else alpha_inf   
         else:
             F = alpha.copy()
             F.data[:,:] = 1.0 if k is None else 1.0 - np.exp(-k * lai.data)
-            F = F * self.alpha_inf[tile] + (F * (-1) + 1) * self.alpha_0
+            F = F * alpha_inf + (F * (-1) + 1) * self.alpha_0
             alpha.data.data = F.data.data
 
         for i in range(0, alpha.shape[0]):
