@@ -37,6 +37,10 @@ alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5
 
 minFracTests = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
 
+albedoLevels = [0, 0.01, 0.05, 0.1, 0.2, 0.4, 0.8]
+monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+              'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
 ###############################################
 ## Open data                                 ##
 ###############################################
@@ -113,7 +117,24 @@ ntiles = [nTilesGT(frac, i, j, k) for (i, j, k) in zip(minFracTests,
 ###############################################
 albedo = Albedo(frac, lais, soilAlb,
                 dict(zip(tile_lev, alph_inf)), dict(zip(tile_lev, alph_k)))
+
+
+## annual cell albedo
 cellAlbedo = albedo.cell(True)
 
+###############################################
+## Basic Albedo plots                        ##
+###############################################
+## tile albedo
+
+plot_cubes_map_ordered(albedo.tiles(), 'pink',
+               albedoLevels, 'max',
+               'figs/constructed_tile_albedos.png',
+               'albedo')
+
+plot_cubes_map(albedo.cell(), monthNames, 'pink',
+               albedoLevels, 'max',
+               'figs/constructed_monthly_albedos.png',
+               'albedo')
 
 browser()

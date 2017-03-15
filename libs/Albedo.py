@@ -36,7 +36,7 @@ class Albedo(object):
         alpha.varn_name = 'albedo'
         return alpha
         
-    def tiles(self, annual = False):
+    def tiles(self, annual = True):
         alphas =  [self.tile(i) for i in self.frac.coord('pseudo_level').points]
         alphas = iris.cube.CubeList(alphas).merge_cube()
         if annual: alphas = alphas.collapsed('time', iris.analysis.MEAN)
