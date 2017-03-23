@@ -74,7 +74,7 @@ def snowInJob(dir):
     plot_cube_TS([mclim], False, ylabel = unit)
     plt.title(dir[:-1])  
     
-    fig_name = 'figs/' + fign + dir[:-1] + '.pdf'
+    fig_name = 'figs/' + fign + dir[:-1] + '.png'
     plt.savefig(fig_name)
 
     mclim.var_name = mclim.long_name = dir[:-1]
@@ -96,7 +96,7 @@ plt.subplot(4, 1, 4)
 plot_cube_TS(snowDays, False, ylabel = unit)
 plt.title( mods_dir[1][:-1] + '-' + mods_dir[0][:-1])
 
-fig_name = 'figs/' + fign + 'diff' + '.pdf'
+fig_name = 'figs/' + fign + 'diff' + '.png'
 plt.savefig(fig_name)
 
 
