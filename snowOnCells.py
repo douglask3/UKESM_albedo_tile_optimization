@@ -68,7 +68,7 @@ def snowInJob(dir):
     ## Plot                 ##
     ##########################
     plot_cubes_map(mclim, 'JFMAMJJASOND', cmap, levels, nx = 6, ny = 3,
-                   cbar_yoff = 0.25)
+                   cbar_yoff = 0.25, projection = None)
     
     plt.subplot(4, 1, 4)
     plot_cube_TS([mclim], False, ylabel = unit)
@@ -90,7 +90,7 @@ diff.data = snowDays[1].data - snowDays[0].data
 
 plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
                nx = 6, ny = 3, cbar_yoff = 0.25,
-                projection = ccrs.InterruptedGoodeHomolosine())
+               projection = None)
     
 plt.subplot(4, 1, 4)
 plot_cube_TS(snowDays, False, ylabel = unit)
