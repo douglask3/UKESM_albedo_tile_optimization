@@ -24,6 +24,7 @@ from   libs.plot_maps    import *
 ###############################################
 ## Setup                                     ##
 ###############################################
+Albe_file = 'data/qrclim.land'
 Frac_file = 'data/N96e_GA7_17_tile_cci_reorder.anc'
 LAI__file = 'data/N96e_GA7_qrparm.veg.13.pft.217.func.anc'
 slAb_file = 'data/qrparm.soil'
@@ -135,6 +136,15 @@ plot_cubes_map_ordered(albedo.tiles(), 'pink',
 plot_cubes_map(albedo.cell(), monthNames, 'pink',
                albedoLevels, 'max',
                'figs/constructed_monthly_albedos.png',
+               'albedo')
+
+constructed = albedo.cell(True)
+
+observed = iris.load(Albe_file)[0]
+aobserved = observed.collapsed('time', iris.analysis.MEAN)
+plot_cubes_map([constructed, aobserved], ['constructed', 'observed'], 'pink',
+               albedoLevels, 'max',
+               'figs/compare_albedos.png',
                'albedo')
 
 browser()
