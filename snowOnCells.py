@@ -67,7 +67,8 @@ def snowInJob(dir):
     ##########################
     ## Plot                 ##
     ##########################
-    plot_cubes_map(mclim, 'JFMAMJJASOND', cmap, levels, nx = 6, ny = 3)
+    plot_cubes_map(mclim, 'JFMAMJJASOND', cmap, levels, nx = 6, ny = 3,
+                   cbar_yoff = 0.25)
     
     plt.subplot(4, 1, 4)
     plot_cube_TS([mclim], False)
@@ -82,7 +83,8 @@ diff = snowDays[0].copy()
 diff.data = snowDays[1].data - snowDays[0].data
 #for i in range(0,12): diff[i].data = snowDays[1][i].data - snowDays[0][i].data
 
-plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both', nx = 6, ny = 3)
+plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
+               nx = 6, ny = 3, cbar_yoff = 0.25)
     
 plt.subplot(4, 1, 4)
 plot_cube_TS(snowDays, False)

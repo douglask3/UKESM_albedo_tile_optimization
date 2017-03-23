@@ -17,25 +17,26 @@ from   libs              import git_info
 
 
 
-def plot_cube(cube, N, M, n, cmap, levels, extend):
-    ax = plt.subplot(N, M, n, projection=ccrs.Robinson())
+def plot_cube(cube, N, M, n, cmap, levels, extend, ):
+    ax = plt.subplot(N, M, n, projection=ccrs.Mollweide())
     ax.set_title(cube.long_name)
 
     cmap = plt.get_cmap(cmap)
-    
     
     if (extend =='max'): 
         norm = BoundaryNorm(levels, ncolors=cmap.N - 1)
     else:
         norm = BoundaryNorm(levels, ncolors=cmap.N)
-
+    
     cf = iplt.contourf(cube, levels = levels, cmap = cmap, norm = norm, extend = extend) 
+    #if (n == 5): browser()
     plt.gca().coastlines()
     return cf
 
 
 def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
-                   figName = None, units = '', nx = None, ny = None, *args):
+                   figName = None, units = '', nx = None, ny = None, 
+                   cbar_yoff = 0.25, *args):
     try:
         cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except:
@@ -51,13 +52,13 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
     elif ny is None:
         ny = math.ceil(nplts / float(nx)) + 1
 
-    plt.figure(figsize = (24 + max(0, (nx - 3)/2), 12 + max(0, (ny - 3)/2)))
+    plt.figure(figsize = (12 + max(0, (ny - 2)/2), 12 + max(0, (nx - 3)/2)))
 
     for i in range(0, len(cubes)):         
         cmapi = cmap if (type(cmap) is str) else cmap[i]
         cf = plot_cube(cubes[i], nx, ny, i + 1, cmapi, levels, extend, *args)
 
-    colorbar_axes = plt.gcf().add_axes([0.15, 0.25 + 0.5 / nx, 0.7, 0.15 / nx])
+    colorbar_axes = plt.gcf().add_axes([0.15, cbar_yoff + 0.5 / nx, 0.7, 0.15 / nx])
     colorbar = plt.colorbar(cf, colorbar_axes, orientation='horizontal')
     colorbar.set_label(units)
     
