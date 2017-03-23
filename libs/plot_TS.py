@@ -33,14 +33,15 @@ def cube_TS(cube, running_mean = False):
     cube = cube.collapsed(['latitude', 'longitude'], iris.analysis.MEAN, weights = grid_areas)
     
     if (running_mean): cube.data = running_N_mean(cube.data, 12)
-    #cube.units = 'g C'
     return cube   
 
-def plot_cube_TS(cubes, running_mean):    
+def plot_cube_TS(cubes, running_mean, ylabel = ''):    
     cubes = [cube_TS(cube, running_mean) for cube in cubes]    
     
-    for cube in cubes: iplt.plot(cube, label = cube.name())
-    plt.ylabel(cube.units)
+    for cube in cubes:
+        label = cube.name() if cube.var_name is None else cube.var_name
+        iplt.plot(cube, label = label)
+    plt.ylabel(ylabel)
     plt.legend(ncol = 2, loc = 0)
     plt.grid(True)    
     plt.axis('tight')

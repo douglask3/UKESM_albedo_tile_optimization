@@ -63,7 +63,7 @@ def snowInJob(dir):
         md = mn * 30
         mclim.data[mn] = dclim[md:(md+30)].collapsed('time', iris.analysis.SUM).data
 
-
+    mclim.units = 'days'
     ##########################
     ## Plot                 ##
     ##########################
@@ -76,10 +76,13 @@ def snowInJob(dir):
     
     fig_name = 'figs/' + fign + dir[:-1] + '.pdf'
     plt.savefig(fig_name)
+
+    mclim.var_name = mclim.long_name = dir[:-1]
     return(mclim)
 
 
 snowDays = [snowInJob(dir) for dir in mods_dir]
+
 diff = snowDays[0].copy()
 
 diff.data = snowDays[1].data - snowDays[0].data
