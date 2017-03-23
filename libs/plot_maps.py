@@ -36,7 +36,7 @@ def plot_cube(cube, N, M, n, cmap, levels, extend, projection = ccrs.Robinson())
 
 def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
                    figName = None, units = '', nx = None, ny = None, 
-                   cbar_yoff = 0.25, *args, **kw):
+                   cbar_yoff = 0.0, *args, **kw):
     try:
         cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except:
