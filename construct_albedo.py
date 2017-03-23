@@ -38,7 +38,7 @@ alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5
 
 minFracTests = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
 
-albedoLevels = [0, 0.01, 0.05, 0.1, 0.2, 0.4, 0.8]
+albedoLevels = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
