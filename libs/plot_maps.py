@@ -17,8 +17,8 @@ from   libs              import git_info
 
 
 
-def plot_cube(cube, N, M, n, cmap, levels, extend, ):
-    ax = plt.subplot(N, M, n, projection=ccrs.Mollweide())
+def plot_cube(cube, N, M, n, cmap, levels, extend, projection = ccrs.Robinson()):
+    ax = plt.subplot(N, M, n, projection = projection)
     ax.set_title(cube.long_name)
 
     cmap = plt.get_cmap(cmap)
@@ -36,7 +36,7 @@ def plot_cube(cube, N, M, n, cmap, levels, extend, ):
 
 def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
                    figName = None, units = '', nx = None, ny = None, 
-                   cbar_yoff = 0.25, *args):
+                   cbar_yoff = 0.25, *args, **kw):
     try:
         cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except:
@@ -56,7 +56,7 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
 
     for i in range(0, len(cubes)):         
         cmapi = cmap if (type(cmap) is str) else cmap[i]
-        cf = plot_cube(cubes[i], nx, ny, i + 1, cmapi, levels, extend, *args)
+        cf = plot_cube(cubes[i], nx, ny, i + 1, cmapi, levels, extend, *args, **kw)
 
     colorbar_axes = plt.gcf().add_axes([0.15, cbar_yoff + 0.5 / nx, 0.7, 0.15 / nx])
     colorbar = plt.colorbar(cf, colorbar_axes, orientation='horizontal')

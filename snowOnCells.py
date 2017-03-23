@@ -27,6 +27,7 @@ import iris
 
 from   pylab import sort      
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
 
 from   libs              import git_info
 from   libs.plot_maps    import *
@@ -84,7 +85,7 @@ diff.data = snowDays[1].data - snowDays[0].data
 #for i in range(0,12): diff[i].data = snowDays[1][i].data - snowDays[0][i].data
 
 plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
-               nx = 6, ny = 3, cbar_yoff = 0.25)
+               nx = 6, ny = 3, cbar_yoff = 0.25, projection = ccrs.InterruptedGoodeHomolosine())
     
 plt.subplot(4, 1, 4)
 plot_cube_TS(snowDays, False)
