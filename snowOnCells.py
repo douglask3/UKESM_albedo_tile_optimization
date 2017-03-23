@@ -62,7 +62,6 @@ def snowInJob(dir):
     for mn in range(0, 12):
         md = mn * 30
         mclim.data[mn] = dclim[md:(md+30)].collapsed('time', iris.analysis.SUM).data
-        mclim.units = unit
 
 
     ##########################
@@ -72,7 +71,7 @@ def snowInJob(dir):
                    cbar_yoff = 0.25)
     
     plt.subplot(4, 1, 4)
-    plot_cube_TS([mclim], False)
+    plot_cube_TS([mclim], False, ylabel = unit)
     plt.title(dir[:-1])  
     
     fig_name = 'figs/' + fign + dir[:-1] + '.pdf'
@@ -91,7 +90,7 @@ plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
                 projection = ccrs.InterruptedGoodeHomolosine())
     
 plt.subplot(4, 1, 4)
-plot_cube_TS(snowDays, False)
+plot_cube_TS(snowDays, False, ylabel = unit)
 plt.title( mods_dir[1][:-1] + '-' + mods_dir[0][:-1])
 
 fig_name = 'figs/' + fign + 'diff' + '.pdf'
