@@ -35,7 +35,7 @@ def plot_cube(cube, N, M, n, cmap, levels, extend):
 
 
 def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
-                   figName = None, units = '', *args):
+                   figName = None, units = '', nx = None, ny = None, *args):
     try:
         cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except:
@@ -43,25 +43,31 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
     
     for i in range(0, len(cubes)):  cubes[i].long_name = nms[i]
     nplts = len(cubes)
-    nx = int(math.sqrt(nplts))
-    ny = math.ceil(nplts / float(nx))
+    if nx is None and ny is None:
+        nx = int(math.sqrt(nplts))
+        ny = math.ceil(nplts / float(nx))
+    elif nx is None:   
+        nx = math.ceil(nplts / float(ny))
+    elif ny is None:
+        ny = math.ceil(nplts / float(nx)) + 1
 
     plt.figure(figsize = (24 + max(0, (nx - 3)/2), 12 + max(0, (ny - 3)/2)))
 
     for i in range(0, len(cubes)):         
         cmapi = cmap if (type(cmap) is str) else cmap[i]
-        cf = plot_cube(cubes[i], nx + 1, ny, i + 1, cmapi, levels, extend, *args)
+        cf = plot_cube(cubes[i], nx, ny, i + 1, cmapi, levels, extend, *args)
 
-    colorbar_axes = plt.gcf().add_axes([0.15, 0.5 / nx, 0.7, 0.15 / nx])
+    colorbar_axes = plt.gcf().add_axes([0.15, 0.25 + 0.5 / nx, 0.7, 0.15 / nx])
     colorbar = plt.colorbar(cf, colorbar_axes, orientation='horizontal')
     colorbar.set_label(units)
     
     git = 'rev:  ' + git_info.rev + '\n' + 'repo: ' + git_info.url
     plt.gcf().text(.05, .95, git, rotation = 270, verticalalignment = "top")
     
-    if (figName is None):
-        plt.show()
-    else :
-        plt.savefig(figName, bbox_inches='tight')
-        plt.clf()
+    if (figName is not None):
+        if figName == 'show':
+            plt.show()
+        else :
+            plt.savefig(figName, bbox_inches='tight')
+            plt.clf()
 
