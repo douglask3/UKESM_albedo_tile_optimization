@@ -73,6 +73,7 @@ def snowInJob(dir):
     
     plt.subplot(4, 1, 4)
     plot_cube_TS([mclim], False)
+    plt.title(dir[:-1])  
     
     fig_name = 'figs/' + fign + dir[:-1] + '.pdf'
     plt.savefig(fig_name)
@@ -81,6 +82,7 @@ def snowInJob(dir):
 
 snowDays = [snowInJob(dir) for dir in mods_dir]
 diff = snowDays[0].copy()
+
 diff.data = snowDays[1].data - snowDays[0].data
 #for i in range(0,12): diff[i].data = snowDays[1][i].data - snowDays[0][i].data
 
@@ -89,6 +91,7 @@ plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
     
 plt.subplot(4, 1, 4)
 plot_cube_TS(snowDays, False)
+plt.title( mods_dir[1][:-1] + '-' + mods_dir[0][:-1])
 
 fig_name = 'figs/' + fign + 'diff' + '.pdf'
 plt.savefig(fig_name)
