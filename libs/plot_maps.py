@@ -36,7 +36,7 @@ def plot_cube(cube, N, M, n, cmap, levels, extend, projection = ccrs.Robinson())
 
 def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
                    figName = None, units = '', nx = None, ny = None, 
-                   cbar_yoff = 0.0, *args, **kw):
+                   cbar_yoff = 0.0, figXscale = 1.0, figYscale = 1.0, *args, **kw):
     try:
         cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except:
@@ -47,12 +47,13 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
     if nx is None and ny is None:
         nx = int(math.sqrt(nplts))
         ny = math.ceil(nplts / float(nx))
+        nx = nx + 1.0
     elif nx is None:   
-        nx = math.ceil(nplts / float(ny))
+        nx = math.ceil(nplts / float(ny)) + 1
     elif ny is None:
-        ny = math.ceil(nplts / float(nx)) + 1
-
-    plt.figure(figsize = (12 + max(0, (ny - 2)/2), 12 + max(0, (nx - 3)/2)))
+        ny = math.ceil(nplts / float(nx))
+    
+    plt.figure(figsize = (nx * 2 * figXscale, ny * 4 * figYscale))
 
     for i in range(0, len(cubes)):         
         cmapi = cmap if (type(cmap) is str) else cmap[i]

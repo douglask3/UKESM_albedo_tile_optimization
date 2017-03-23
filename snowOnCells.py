@@ -10,7 +10,7 @@ running_mean = False
 ## albedo
 fign    = 'snowDays'
 ttle    = 'Snow_Days'
-unit    = '%'
+unit    = 'days of snow on ground'
 levels  = np.arange(0, 35, 5)
 dlevels = np.array([0.1, 1, 3, 5, 10])
 dlevels = np.concatenate([ -dlevels[::-1], dlevels])
@@ -62,7 +62,7 @@ def snowInJob(dir):
     for mn in range(0, 12):
         md = mn * 30
         mclim.data[mn] = dclim[md:(md+30)].collapsed('time', iris.analysis.SUM).data
-        mclim.units = 'day'
+        mclim.units = unit
 
 
     ##########################
@@ -87,7 +87,8 @@ diff.data = snowDays[1].data - snowDays[0].data
 #for i in range(0,12): diff[i].data = snowDays[1][i].data - snowDays[0][i].data
 
 plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
-               nx = 6, ny = 3, cbar_yoff = 0.25, projection = ccrs.InterruptedGoodeHomolosine())
+               nx = 6, ny = 3, cbar_yoff = 0.25,
+                projection = ccrs.InterruptedGoodeHomolosine())
     
 plt.subplot(4, 1, 4)
 plot_cube_TS(snowDays, False)

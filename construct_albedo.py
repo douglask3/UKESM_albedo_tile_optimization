@@ -131,12 +131,12 @@ cellAlbedo = albedo.cell(True)
 plot_cubes_map_ordered(albedo.tiles(), 'pink',
                albedoLevels, 'max',
                'figs/constructed_tile_albedos.png',
-               'albedo')
+               'albedo', figXscale = 4)
 
 plot_cubes_map(albedo.cell(), monthNames, 'pink',
                albedoLevels, 'max',
                'figs/constructed_monthly_albedos.png',
-               'albedo')
+               'albedo', figXscale = 4)
 
 constructed = albedo.cell(True)
 
@@ -145,6 +145,6 @@ aobserved = observed.collapsed('time', iris.analysis.MEAN)
 plot_cubes_map([constructed, aobserved], ['constructed', 'observed'], 'pink',
                albedoLevels, 'max',
                'figs/compare_albedos.png',
-               'albedo')
+               'albedo', figXscale = 4)
 
 browser()
