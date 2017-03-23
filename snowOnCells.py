@@ -8,11 +8,14 @@ mods_dir = ['u-ak508/', 'u-ak518/']
 running_mean = False
 
 ## albedo
-fign = 'snowDays'
-ttle = 'Snow_Days'
-unit = '%'
-levels = range(0, 35, 5)
-cmap = 'brewer_GnBu_09'
+fign    = 'snowDays'
+ttle    = 'Snow_Days'
+unit    = '%'
+levels  = np.arange(0, 35, 5)
+dlevels = np.array([0.1, 1, 3, 5, 10])
+dlevels = np.concatenate([ -dlevels[::-1], dlevels])
+cmap    = 'brewer_GnBu_09'
+dcmap   = 'brewer_Spectral_11'
 
 
 #############################################################################
@@ -37,10 +40,11 @@ from   pdb   import set_trace as browser
 ## Funs                                                                    ##
 #############################################################################
 
-for dir in mods_dir:
+
+def snowInJob(dir):
     files = sort(listdir_path(data_dir + dir))
     files = files[0:60]
-
+    
     dat = iris.load_cube(files)
     dclim = dat[0:360].copy()
     mclim = dat[15:360:30].copy()
@@ -63,15 +67,27 @@ for dir in mods_dir:
     ##########################
     ## Plot                 ##
     ##########################
-    fig_name = 'figs/' + fign + dir[:-1] + '.pdf'
-    #git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
-
-    
-    plot_cubes_map(mclim, 'JASONDJFMAMJ', cmap, levels, nx = 6, ny = 3)
+    plot_cubes_map(mclim, 'JFMAMJJASOND', cmap, levels, nx = 6, ny = 3)
     
     plt.subplot(4, 1, 4)
     plot_cube_TS([mclim], False)
     
-    #plt.gcf().text(.05, .95, git, rotation = 90)
+    fig_name = 'figs/' + fign + dir[:-1] + '.pdf'
     plt.savefig(fig_name)
+    return(mclim)
+
+
+snowDays = [snowInJob(dir) for dir in mods_dir]
+diff = snowDays[0].copy()
+diff.data = snowDays[1].data - snowDays[0].data
+#for i in range(0,12): diff[i].data = snowDays[1][i].data - snowDays[0][i].data
+
+plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both', nx = 6, ny = 3)
+    
+plt.subplot(4, 1, 4)
+plot_cube_TS(snowDays, False)
+
+fig_name = 'figs/' + fign + 'diff' + '.pdf'
+plt.savefig(fig_name)
+
 
