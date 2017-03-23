@@ -38,7 +38,7 @@ from   pdb   import set_trace as browser
 #############################################################################
 
 for dir in mods_dir:
-    files = sort(listdir_path(data_dir + mods_dir[0]))
+    files = sort(listdir_path(data_dir + dir))
     files = files[0:60]
 
     dat = iris.load_cube(files)
