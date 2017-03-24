@@ -69,7 +69,8 @@ def snowInJobMnth(dir, figN):
         aclim.data[yr] = mclim[ym:(ym+12)].collapsed('time', iris.analysis.SUM).data    
     
     labels = [str(i)[10:14] for i in aclim.coord('time')]
-    return plotMapsTS(aclim, figN, dir, cmap, ann_levels, labels = labels), labels
+    mclim = plotMapsTS(mclim, figN, dir, cmap, ann_levels, labels = labels, mdat = aclim)
+    return mclim, aclim, labels
 
 
 def snowInJobClim(dir, figN):
@@ -87,8 +88,8 @@ def snowInJobClim(dir, figN):
     for mn in range(0, 12):
         md = mn * 30
         mclim.data[mn] = dclim[md:(md+30)].collapsed('time', iris.analysis.SUM).data
-    
-    return plotMapsTS(mclim, figN, dir, cmap, clim_levels), 'JFMAMJJASOND'
+    mclim = plotMapsTS(mclim, figN, dir, cmap, clim_levels)
+    return mclim, mclim, 'JFMAMJJASOND'
 
 
 def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
@@ -119,14 +120,16 @@ def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
 def snowInJobs(FUN, levels, figN):
     
     snowDays = [FUN(dir, figN) for dir in mods_dir]
-    labels = snowDays[0][1]
-    snowDays = [i[0] for i in snowDays]
+    
+    labels = snowDays[0][2]
+    #snowDays = [i[0] for i in snowDays]
 
-    diff = snowDays[0].copy()
-    diff.data = snowDays[1].data - snowDays[0].data
+    diff = snowDays[1][1].copy()
+    diff.data -= snowDays[0][1].data
+    tdat = [snowDays[0][0], snowDays[1][0]]
     
     title = mods_dir[1][:-1] + '-' + mods_dir[0][:-1] + '/'
-    plotMapsTS(snowDays, figN, title, dcmap, levels, labels, diff, extend = 'both')
+    plotMapsTS(tdat, figN, title, dcmap, levels, labels, diff, extend = 'both')
 
 
 snowInJobs(snowInJobMnth,  ann_dlevels, 'annual')
