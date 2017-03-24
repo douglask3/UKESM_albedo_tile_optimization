@@ -93,7 +93,7 @@ def snowInJobClim(dir, figN):
 
 
 def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
-              mdat = None, nx = 6, ny = 3, *args, **kw):
+              mdat = None, nx = 6, ny = 3, running_mean = False, *args, **kw):
     if mdat is None: mdat = dat
 
     try: dat.units = 'days'
@@ -105,7 +105,7 @@ def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
     plt.subplot(4, 1, 4)
     
     tdat = dat if type(dat) == list else [dat]
-    plot_cube_TS(tdat, False, ylabel = unit)
+    plot_cube_TS(tdat, running_mean, ylabel = unit)
     
     plt.title(dir[:-1])  
     
@@ -117,7 +117,7 @@ def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
     return dat
 
 
-def snowInJobs(FUN, levels, figN):
+def snowInJobs(FUN, levels, figN, *args, **kw):
     
     snowDays = [FUN(dir, figN) for dir in mods_dir]
     
@@ -129,9 +129,10 @@ def snowInJobs(FUN, levels, figN):
     tdat = [snowDays[0][0], snowDays[1][0]]
     
     title = mods_dir[1][:-1] + '-' + mods_dir[0][:-1] + '/'
-    plotMapsTS(tdat, figN, title, dcmap, levels, labels, diff, extend = 'both')
+    plotMapsTS(tdat, figN, title, dcmap, levels, labels,
+               diff, extend = 'both', *args, **kw)
 
 
-snowInJobs(snowInJobMnth,  ann_dlevels, 'annual')
+snowInJobs(snowInJobMnth,  ann_dlevels, 'annual', running_mean = True)
 snowInJobs(snowInJobClim, clim_dlevels, 'climty')
 
