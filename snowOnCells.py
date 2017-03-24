@@ -23,6 +23,13 @@ ann_dlevels  = np.concatenate([-ann_dlevels[::-1], ann_dlevels])
 cmap    = 'brewer_GnBu_09'
 dcmap   = 'brewer_Spectral_11'
 
+regionNames = ['global', 'NA' , 'NA2', 'Asia', 'Asia2']
+east        = [ None   , 260.0, 275.0,  80.0 ,  80.0  ]
+west        = [ None   , 310.0, 295.0, 105.0 , 105.0  ]
+south       = [ None   ,  50.0,  45.0,  35.0 ,  45.0  ]
+north       = [ None   ,  65.0,  55.0,  50.0 ,  55.0  ]
+
+   
 
 #############################################################################
 ## libs                                                                    ##
@@ -46,15 +53,44 @@ from   pdb   import set_trace as browser
 #############################################################################
 ## Funs                                                                    ##
 #############################################################################
-def loadCube(dir):
+class ExtractLocation(object):
+    def __init__(self, cubes, east, west, south, north):
+        self.lon = self.coordRange2List([east, west])
+        self.lat = self.coordRange2List([south, north])
+    
+        def lonRange(cell): return self.lon[0] <= cell <= self.lon[1]
+        def latRange(cell): return self.lat[0] <= cell <= self.lat[1]
+
+        if self.lon is not None:
+            try:
+                cubes = cubes.extract(iris.Constraint(longitude = lonRange))
+            except:
+                cubes = [cube.extract(iris.Constraint(longitude = lonRange)) for cube in cubes]
+        if self.lat is not None:
+            try:
+                cubes = cubes.extract(iris.Constraint(latitude  = latRange))
+            except:
+                cubes = [cube.extract(iris.Constraint(latitude  = latRange)) for cube in cubes]
+        self.cubes = cubes
+
+    def coordRange2List(self, c):
+        if c is not None:
+            if not isinstance(c, list) or len(c) == 1: c = [c, c]
+            if c[0] is None: return None
+        return c
+
+def loadCube(dir, *args, **kw):
     files = sort(listdir_path(data_dir + dir))
-    files = files[0:120]
+    files = files[0:24]
     dat = iris.load_cube(files)
+    
+    dat = ExtractLocation(dat, *args, **kw).cubes
+
     dat.data = (dat.data > 0.00001) / 1.0
     return dat
 
-def snowInJobMnth(dir, figN):    
-    dat = loadCube(dir)
+def snowInJobMnth(dir, figN, *args, **kw):    
+    dat = loadCube(dir, *args, **kw)
     
     mclim = dat[15::30].copy()
 
@@ -73,8 +109,8 @@ def snowInJobMnth(dir, figN):
     return mclim, aclim, labels
 
 
-def snowInJobClim(dir, figN):
-    dat = loadCube(dir)
+def snowInJobClim(dir, figN, *args, **kw):
+    dat = loadCube(dir, *args, **kw)
 
     dclim = dat[0:360].copy()
     mclim = dat[15:360:30].copy()
@@ -117,9 +153,10 @@ def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
     return dat
 
 
-def snowInJobs(FUN, levels, figN, *args, **kw):
+def snowInJobs(FUN, levels, regionName, figN, running_mean = False, *args, **kw):
     
-    snowDays = [FUN(dir, figN) for dir in mods_dir]
+    figN = figN + '-' + regionName
+    snowDays = [FUN(dir, figN, *args, **kw) for dir in mods_dir]
     
     labels = snowDays[0][2]
     #snowDays = [i[0] for i in snowDays]
@@ -130,9 +167,12 @@ def snowInJobs(FUN, levels, figN, *args, **kw):
     
     title = mods_dir[1][:-1] + '-' + mods_dir[0][:-1] + '/'
     plotMapsTS(tdat, figN, title, dcmap, levels, labels,
-               diff, extend = 'both', *args, **kw)
+               diff, running_mean = running_mean, extend = 'both')
 
 
-snowInJobs(snowInJobMnth,  ann_dlevels, 'annual', running_mean = True)
-snowInJobs(snowInJobClim, clim_dlevels, 'climty')
+def plotRegion(regionName, *args, **kw):
+    snowInJobs(snowInJobMnth,  ann_dlevels, regionName,  'annual', True, *args, **kw)
+    snowInJobs(snowInJobClim, clim_dlevels, regionName, 'climty', *args, **kw)
 
+for r, e, w, s, n in zip(regionNames, east, west, south, north):
+    plotRegion(r, east = e, west = w, south = s, north = n)
