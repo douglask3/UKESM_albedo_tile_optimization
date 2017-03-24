@@ -16,7 +16,7 @@ clim_levels  = np.arange(0, 35, 5)
 clim_dlevels = np.array([0.1, 1, 3, 5, 10])
 clim_dlevels = np.concatenate([-clim_dlevels[::-1], clim_dlevels])
 
-ann_levels   = np.arange(0, 360, 30)
+ann_levels   = np.arange(0, 390, 30)
 ann_dlevels  = np.array([1, 5, 10, 30, 90])
 ann_dlevels  = np.concatenate([-ann_dlevels[::-1], ann_dlevels])
 
