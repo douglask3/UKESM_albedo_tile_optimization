@@ -11,9 +11,15 @@ running_mean = False
 fign    = 'snowDays'
 ttle    = 'Snow_Days'
 unit    = 'days of snow on ground'
-levels  = np.arange(0, 35, 5)
-dlevels = np.array([0.1, 1, 3, 5, 10])
-dlevels = np.concatenate([ -dlevels[::-1], dlevels])
+
+clim_levels  = np.arange(0, 35, 5)
+clim_dlevels = np.array([0.1, 1, 3, 5, 10])
+clim_dlevels = np.concatenate([-clim_dlevels[::-1], clim_dlevels])
+
+ann_levels   = np.arange(0, 360, 30)
+ann_dlevels  = np.array([1, 5, 10, 30, 90])
+ann_dlevels  = np.concatenate([-ann_dlevels[::-1], ann_dlevels])
+
 cmap    = 'brewer_GnBu_09'
 dcmap   = 'brewer_Spectral_11'
 
@@ -40,17 +46,37 @@ from   pdb   import set_trace as browser
 #############################################################################
 ## Funs                                                                    ##
 #############################################################################
-
-
-def snowInJob(dir):
+def loadCube(dir):
     files = sort(listdir_path(data_dir + dir))
-    files = files[0:60]
-    
+    files = files[0:120]
     dat = iris.load_cube(files)
+    dat.data = (dat.data > 0.00001) / 1.0
+    return dat
+
+def snowInJobMnth(dir, figN):    
+    dat = loadCube(dir)
+    
+    mclim = dat[15::30].copy()
+
+    for mn in range(0, mclim.shape[0]):
+        md = mn * 30
+        mclim.data[mn] = dat[md:(md+30)].collapsed('time', iris.analysis.SUM).data
+    
+    aclim = mclim[6::12].copy()
+
+    for yr in range(0, aclim.shape[0]):
+        ym = yr * 12
+        aclim.data[yr] = mclim[ym:(ym+12)].collapsed('time', iris.analysis.SUM).data    
+    
+    labels = [str(i)[10:14] for i in aclim.coord('time')]
+    return plotMapsTS(aclim, figN, dir, cmap, ann_levels, labels = labels), labels
+
+
+def snowInJobClim(dir, figN):
+    dat = loadCube(dir)
+
     dclim = dat[0:360].copy()
     mclim = dat[15:360:30].copy()
-
-    dat.data = dat.data > 0.00001
 
     ## convert to climatology
     nyrs = np.floor(dat.shape[0] / 360.0)
@@ -58,45 +84,51 @@ def snowInJob(dir):
     for day in range(0, 360):
         dclim.data[day] = dat[day::360].collapsed('time', iris.analysis.SUM).data / nyrs
 
-    pp = -1
     for mn in range(0, 12):
         md = mn * 30
         mclim.data[mn] = dclim[md:(md+30)].collapsed('time', iris.analysis.SUM).data
+    
+    return plotMapsTS(mclim, figN, dir, cmap, clim_levels), 'JFMAMJJASOND'
 
-    mclim.units = 'days'
-    ##########################
-    ## Plot                 ##
-    ##########################
-    plot_cubes_map(mclim, 'JFMAMJJASOND', cmap, levels, nx = 6, ny = 3,
-                   cbar_yoff = 0.25, projection = None)
+
+def plotMapsTS(dat, figN, dir, cmap, levels, labels = 'JFMAMJJASOND',
+              mdat = None, nx = 6, ny = 3, *args, **kw):
+    if mdat is None: mdat = dat
+
+    try: dat.units = 'days'
+    except: pass
+
+    plot_cubes_map(mdat, labels, cmap, levels, nx = 6, ny = 3,
+                   cbar_yoff = 0.25, projection = None, *args, **kw)
     
     plt.subplot(4, 1, 4)
-    plot_cube_TS([mclim], False, ylabel = unit)
+    
+    tdat = dat if type(dat) == list else [dat]
+    plot_cube_TS(tdat, False, ylabel = unit)
+    
     plt.title(dir[:-1])  
     
-    fig_name = 'figs/' + fign + dir[:-1] + '.png'
+    fig_name = 'figs/' + fign + '-' + figN + '-' + dir[:-1] + '.png'
     plt.savefig(fig_name)
 
-    mclim.var_name = mclim.long_name = dir[:-1]
-    return(mclim)
+    try: dat.var_name = dat.long_name = dir[:-1]
+    except: pass
+    return dat
 
 
-snowDays = [snowInJob(dir) for dir in mods_dir]
-
-diff = snowDays[0].copy()
-
-diff.data = snowDays[1].data - snowDays[0].data
-#for i in range(0,12): diff[i].data = snowDays[1][i].data - snowDays[0][i].data
-
-plot_cubes_map(diff, 'JFMAMJJASOND', dcmap, dlevels, extend = 'both',
-               nx = 6, ny = 3, cbar_yoff = 0.25,
-               projection = None)
+def snowInJobs(FUN, levels, figN):
     
-plt.subplot(4, 1, 4)
-plot_cube_TS(snowDays, False, ylabel = unit)
-plt.title( mods_dir[1][:-1] + '-' + mods_dir[0][:-1])
+    snowDays = [FUN(dir, figN) for dir in mods_dir]
+    labels = snowDays[0][1]
+    snowDays = [i[0] for i in snowDays]
 
-fig_name = 'figs/' + fign + 'diff' + '.png'
-plt.savefig(fig_name)
+    diff = snowDays[0].copy()
+    diff.data = snowDays[1].data - snowDays[0].data
+    
+    title = mods_dir[1][:-1] + '-' + mods_dir[0][:-1] + '/'
+    plotMapsTS(snowDays, figN, title, dcmap, levels, labels, diff, extend = 'both')
 
+
+snowInJobs(snowInJobMnth,  ann_dlevels, 'annual')
+snowInJobs(snowInJobClim, clim_dlevels, 'climty')
 
