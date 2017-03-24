@@ -81,7 +81,7 @@ class ExtractLocation(object):
 
 def loadCube(dir, *args, **kw):
     files = sort(listdir_path(data_dir + dir))
-    files = files[0:24]
+    files = files[0:120]
     dat = iris.load_cube(files)
     
     dat = ExtractLocation(dat, *args, **kw).cubes
