@@ -56,6 +56,22 @@ for i in range(0, 12):
     lais[i].add_aux_coord(iris.coords.DimCoord(np.int32(i),'time'))
 
 lais = lais.merge()[0]
+lais_reorder = lais.copy()
+lais_reorder.data[:] = 0.0
+mn = pft = 0
+
+for j in range(0, 13):
+    for i in range(0, 12):
+        if pft == 13:
+            pft = 0
+            mn = mn + 1
+        lais_reorder.data[mn, pft] = lais.data[i,j]
+        
+        pft = pft + 1
+#browser()
+#lais.data = lais_reorder.data 
+
+
 mxLAI   = lais.collapsed('time', iris.analysis.MAX)
 
 ###############################################
@@ -102,6 +118,12 @@ for pft in range(0, 13):
     plot_cubes_map(lais[:, pft, :, :], monthNames, 'brewer_Greens_09',
                [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
                'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
+               'LAI', figXscale = 4)
+
+    
+    plot_cubes_map(lais_reorder[:, pft, :, :], monthNames, 'brewer_Greens_09',
+               [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
+               'figs/N96e_GA7_qrparm.veg.13.pft.217.func_reordered' + 'tile' + str(pft) + '.png',
                'LAI', figXscale = 4)
 
 ###############################################
