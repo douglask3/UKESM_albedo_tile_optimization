@@ -92,15 +92,15 @@ def plot_cubes_map_ordered(cube, *args, **kw):
 #                       'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
 #                       'LAI')
 
-for mn in range(0,12):
-    plot_cubes_map_ordered(lais0[mn], 'brewer_Greens_09',
-                           [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
-                           'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'month' + str(mn) + '.png',
-                           'LAI')
+#for mn in range(0,12):
+#    plot_cubes_map_ordered(lais0[mn], 'brewer_Greens_09',
+#                           [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
+#                           'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'month' + str(mn) + '.png',
+#                           'LAI')
 
 for pft in range(0, 13):
     plot_cubes_map(lais[:, pft, :, :], monthNames, 'brewer_Greens_09',
-               [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
+               [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
                'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
                'LAI', figXscale = 4)
 
