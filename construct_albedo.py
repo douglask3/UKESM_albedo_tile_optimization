@@ -50,6 +50,8 @@ tileIndex = frac.coords('pseudo_level')[0].points
 lais    = iris.load(LAI__file)
 soilAlb = iris.load_cube(slAb_file, slAb_varn)
 
+lais0 =  lais
+
 for i in range(0, 12):
     lais[i].add_aux_coord(iris.coords.DimCoord(np.int32(i),'time'))
 
@@ -77,7 +79,7 @@ def plot_cubes_map_ordered(cube, *args, **kw):
     codes = [frac.coords('pseudo_level')[0].points[i] for i in PlotOrder]
     cube = [cube[i] for i in PlotOrder if i < cube.shape[0]]
     nms = [i + '-' + str(j) for i,j in zip(tile_nme, codes)]
-    plot_cubes_map(cube, nms, *args, **kw)
+    plot_cubes_map(cube, nms, figXscale = 4, *args, **kw)
 
 
 #plot_cubes_map_ordered(frac, 'brewer_Greens_09',
@@ -89,6 +91,18 @@ def plot_cubes_map_ordered(cube, *args, **kw):
 #                       [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
 #                       'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
 #                       'LAI')
+
+for mn in range(0,12):
+    plot_cubes_map_ordered(lais0[mn], 'brewer_Greens_09',
+                           [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
+                           'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'month' + str(mn) + '.png',
+                           'LAI')
+
+for pft in range(0, 13):
+    plot_cubes_map(lais[:, pft, :, :], monthNames, 'brewer_Greens_09',
+               [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
+               'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
+               'LAI', figXscale = 4)
 
 ###############################################
 ## Pre-optimization plots                    ##
