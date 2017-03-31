@@ -65,7 +65,7 @@ tile_nme = ['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SH
 alph_inf = [0.1 ,0.1  ,0.1  ,0.1  ,0.1  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.18   ,0.06  , -1.0       , 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75]
 alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,None   ,None  ,None       ,None,None,None,None,None,None,None,None,None,None,None ]
 
-files = sort(listdir_path(data_dir + mod_dir))[0:48]
+files = sort(listdir_path(data_dir + mod_dir))[0:120]
 
 lais = load_stash(files, LAI__code, 'lai' )
 frac = load_stash(files, Frac_code, 'frac')
