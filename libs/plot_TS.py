@@ -11,7 +11,9 @@ def grid_area(cube):
     if cube.coord('latitude').bounds is None:
         cube.coord('latitude').guess_bounds()
         cube.coord('longitude').guess_bounds()
-    return iris.analysis.cartography.area_weights(cube)    
+    grid_areas = iris.analysis.cartography.area_weights(cube)    
+    #grid_areas[cube.data.mask] = 0.0
+    return grid_areas
 
 ### Running mean/Moving average
 def running_N_mean(l, N):
@@ -29,8 +31,11 @@ def running_N_mean(l, N):
     return result
 
 def cube_TS(cube, running_mean = False):
-    grid_areas = grid_area(cube)
-    cube = cube.collapsed(['latitude', 'longitude'], iris.analysis.MEAN, weights = grid_areas)
+    grid_areas = grid_area(cube) 
+    #cube = cube.collapsed(['latitude', 'longitude'], iris.analysis.MEAN, weights = grid_areas)
+    
+    cube = cube.collapsed(['longitude'], iris.analysis.MEAN).\
+                collapsed(['latitude' ], iris.analysis.MEAN, weights = grid_areas[:,:,0])
     
     if (running_mean): cube.data = running_N_mean(cube.data, 12)
     return cube   

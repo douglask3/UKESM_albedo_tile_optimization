@@ -9,14 +9,14 @@ def load_stash(files, code, name, units = None):
     print code
 
     stash_constraint = iris.AttributeConstraint(STASH = code)
-    
     cube = iris.load_cube(files, stash_constraint)
+
     cube.var_name = name
     cube.standard_name = None
     if (units is not None): cube.units = units
     return cube   
 
-def loadCube(dir, *args, **kw):
+def loadCube(dir, data_dir, code = None, *args, **kw):
     files = sort(listdir_path(data_dir + dir))
     files = files[0:120]
     dat = iris.load_cube(files)
