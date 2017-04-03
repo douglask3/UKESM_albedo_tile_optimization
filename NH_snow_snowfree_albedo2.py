@@ -69,11 +69,18 @@ soilAlb = iris.load_cube(slAb_file, slAb_varn)
 albedo = Albedo(frac, lais, soilAlb, dict(zip(tile_lev, alph_inf)), dict(zip(tile_lev, alph_k)))
 cell_albedo  = albedo.cell()
 
-plotInterAnnual(cell_albedo, mod_dir[0:7], fign, mnthLength = 1,
-                timeCollapse = iris.analysis.MEAN, levels = levels)
-
-plotClimatology(cell_albedo, mod_dir[0:7], fign, mnthLength = 1,
-                timeCollapse = iris.analysis.MEAN, nyrNormalise = False,
-                levels = levels)
 
 
+
+def plotRegion(regionName, *args, **kw):
+    dat = ExtractLocation(cell_albedo, *args, **kw).cubes
+    figN = fign + '-' + regionName + '-'
+    plotInterAnnual(dat, mod_dir[0:7], figN, mnthLength = 1,
+                    timeCollapse = iris.analysis.MEAN, levels = levels)
+
+    plotClimatology(dat, mod_dir[0:7], figN, mnthLength = 1,
+                    timeCollapse = iris.analysis.MEAN, nyrNormalise = False,
+                    levels = levels)
+
+for r, e, w, s, n in zip(regionNames, east, west, south, north):
+    plotRegion(r, east = e, west = w, south = s, north = n)
