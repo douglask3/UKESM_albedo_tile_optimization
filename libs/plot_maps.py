@@ -36,11 +36,19 @@ def plot_cube(cube, N, M, n, cmap, levels, extend, projection = ccrs.Robinson())
 
 def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
                    figName = None, units = '', nx = None, ny = None, 
-                   cbar_yoff = 0.0, figXscale = 1.0, figYscale = 1.0, *args, **kw):
+                   cbar_yoff = 0.0, figXscale = 1.0, figYscale = 1.0, 
+                   totalMap = None, *args, **kw):
+    
     try:
-        cubes = [cubes[i] for i in range(0, cubes.shape[0])]
-    except:
-        pass
+        cubeT =cubes.collapsed('time', totalMap)
+        nms.append('Total')
+    except: cubeT = None  
+
+    try: cubes = [cubes[i] for i in range(0, cubes.shape[0])]
+    except: pass
+    
+    try: cubes.append(cubeT)
+    except: pass
     
     for i in range(0, len(cubes)):  cubes[i].long_name = nms[i]
     nplts = len(cubes)

@@ -117,9 +117,9 @@ def plotInterAnnual(dat, jbName, figN, mnthLength = 30, timeCollapse = iris.anal
         ym = yr * 12
         aclim.data[yr] = mclim[ym:(ym+12)].collapsed('time', timeCollapse).data    
         
-    
     labels = [str(i)[10:14] for i in aclim.coord('time')]
-    mclim = plotMapsTS(mclim, figN, jbName, cmap, ann_levels, labels = labels, mdat = aclim)
+    mclim = plotMapsTS(mclim, figN, jbName, cmap, ann_levels,
+                       labels = labels, mdat = aclim, totalMap = timeCollapse)
     return mclim, aclim, labels
 
 plotInterAnnual(cell_albedo, mod_dir[0:7], fign, mnthLength = 1,
