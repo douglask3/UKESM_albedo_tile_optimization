@@ -41,14 +41,14 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
     
     try:
         cubeT =cubes.collapsed('time', totalMap)
+        nms = [i for i in nms]
         nms.append('Total')
     except: cubeT = None  
 
     try: cubes = [cubes[i] for i in range(0, cubes.shape[0])]
     except: pass
     
-    try: cubes.append(cubeT)
-    except: pass
+    if cubeT is not None: cubes.append(cubeT)
     
     for i in range(0, len(cubes)):  cubes[i].long_name = nms[i]
     nplts = len(cubes)
