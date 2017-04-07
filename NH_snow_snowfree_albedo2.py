@@ -26,7 +26,8 @@ from   pdb   import set_trace as browser
 
 ## General
 data_dir = 'data/'
-mod_dir  = 'u-ak518/u-ak518/'
+mod_dir_veg  = 'u-ak518/u-ak518/'
+mod_dir_SW_  = 'u-ak518/SW/'
 
 ## albedo
 fign    = 'albedos_u-ak518'
@@ -47,6 +48,8 @@ north       = [ None   ,  65.0,  55.0,  50.0 ,  55.0  ]
 
 Frac_code = 'm01s19i013'
 LAI__code = 'm01s19i014'
+SWd__code = 'm01s01i210'
+SWu__code = 'm01s01i211'
 
 slAb_file = 'data/qrparm.soil'
 slAb_varn = 'soil_albedo'
@@ -60,27 +63,35 @@ tile_nme = ['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SH
 alph_inf = [0.1 ,0.1  ,0.1  ,0.1  ,0.1  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.18   ,0.06  , -1.0       , 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75]
 alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,None   ,None  ,None       ,None,None,None,None,None,None,None,None,None,None,None ]
 
-files = sort(listdir_path(data_dir + mod_dir))[0:120]
+files   = sort(listdir_path(data_dir + mod_dir_SW_))[0:120]
+SWd     = load_stash(files, SWd__code, 'SWdown' )
+SWu     = load_stash(files, SWu__code, 'SWup')
+albedo  = SWu/SWd
 
-lais = load_stash(files, LAI__code, 'lai' )
-frac = load_stash(files, Frac_code, 'frac')
+files   = sort(listdir_path(data_dir + mod_dir_veg))[0:120]
+lais    = load_stash(files, LAI__code, 'lai' )
+frac    = load_stash(files, Frac_code, 'frac')
+
 soilAlb = iris.load_cube(slAb_file, slAb_varn)
 
-albedo = Albedo(frac, lais, soilAlb, dict(zip(tile_lev, alph_inf)), dict(zip(tile_lev, alph_k)))
-cell_albedo  = albedo.cell()
+sf_albedo = Albedo(frac, lais, soilAlb, dict(zip(tile_lev, alph_inf)),
+                   dict(zip(tile_lev, alph_k)))
+cell_sf_albedo  = sf_albedo.cell()
 
 
-
-
-def plotRegion(regionName, *args, **kw):
-    dat = ExtractLocation(cell_albedo, *args, **kw).cubes
-    figN = fign + '-' + regionName + '-'
-    plotInterAnnual(dat, mod_dir[0:7], figN, mnthLength = 1,
+def plotRegion(dat, nm, regionName, *args, **kw):
+    dat = ExtractLocation(dat, *args, **kw).cubes
+    figN = fign + '-' + nm + '-' + regionName + '-'
+    plotInterAnnual(dat, mod_dir_veg[0:7], figN, mnthLength = 1,
                     timeCollapse = iris.analysis.MEAN, levels = levels)
 
-    plotClimatology(dat, mod_dir[0:7], figN, mnthLength = 1,
+    plotClimatology(dat, mod_dir_veg[0:7], figN, mnthLength = 1,
                     timeCollapse = iris.analysis.MEAN, nyrNormalise = False,
                     levels = levels)
 
-for r, e, w, s, n in zip(regionNames, east, west, south, north):
-    plotRegion(r, east = e, west = w, south = s, north = n)
+def plotAllRegions(dat, nm):
+    for r, e, w, s, n in zip(regionNames, east, west, south, north):
+        plotRegion(dat, nm, r, east = e, west = w, south = s, north = n)
+
+plotAllRegions(cell_sf_albedo, 'snow_free')
+plotAllRegions(albedo, 'all_albedo')
