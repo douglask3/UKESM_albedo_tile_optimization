@@ -58,7 +58,7 @@ def plotClimatology(dat, jbName, figN, mnthLength = 30,
 def plotMapsTS(dat, figN, jbName, levels, cmap = 'pink', labels = 'JFMAMJJASOND',
                units = 'days', mdat = None, nx = 6, ny = 3, running_mean = False, *args, **kw):
     if mdat is None: mdat = dat
-
+    print(figN)
     try: dat.units = units
     except: pass
 
@@ -68,7 +68,8 @@ def plotMapsTS(dat, figN, jbName, levels, cmap = 'pink', labels = 'JFMAMJJASOND'
     plt.subplot(4, 1, 4)
     
     tdat = dat if type(dat) == list else [dat]
-    plot_cube_TS(tdat, running_mean, ylabel = units)
+    
+    plot_cube_TS(tdat, running_mean, xticksLabs = labels, ylabel = units)
     
     plt.title(jbName)  
     

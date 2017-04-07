@@ -40,12 +40,16 @@ def cube_TS(cube, running_mean = False):
     if (running_mean): cube.data = running_N_mean(cube.data, 12)
     return cube   
 
-def plot_cube_TS(cubes, running_mean, ylabel = ''):    
+def plot_cube_TS(cubes, running_mean, xticksLabs = None, ylabel = ''):    
     cubes = [cube_TS(cube, running_mean) for cube in cubes]    
     
     for cube in cubes:
         label = cube.name() if cube.var_name is None else cube.var_name
-        iplt.plot(cube, label = label)
+        plt.plot(cubes[0].data)
+    
+    tickMarks = range(0, len(cube.data), len(cube.data) / len(xticksLabs))
+    plt.xticks(tickMarks, xticksLabs)
+    if len(cube.data) == 12: plt.xlim([0,11])
     plt.ylabel(ylabel)
     plt.legend(ncol = 2, loc = 0)
     plt.grid(True)    

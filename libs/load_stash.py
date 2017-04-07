@@ -7,9 +7,9 @@ from   libs.listdir_path import *
 def load_stash(files, code, name, units = None):
     print name
     print code
-
+    
     stash_constraint = iris.AttributeConstraint(STASH = code)
-    cube = iris.load_cube(files, stash_constraint)
+    cube = iris.load(files, stash_constraint)[0]
 
     cube.var_name = name
     cube.standard_name = None
@@ -19,8 +19,9 @@ def load_stash(files, code, name, units = None):
 def loadCube(dir, data_dir, code = None, *args, **kw):
     files = sort(listdir_path(data_dir + dir))
     files = files[0:120]
-    dat = iris.load_cube(files)
     
+    dat = iris.load_cube(files)
+     
     dat = ExtractLocation(dat, *args, **kw).cubes
 
     dat.data = (dat.data > 0.00001) / 1.0
