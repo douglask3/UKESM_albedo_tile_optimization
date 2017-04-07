@@ -59,10 +59,9 @@ class Albedo(object):
         else:
             if self.frac_has_time:
                 alphas.data *= self.frac.data
-            else:
-                browser()
-                for tile in alphas.coord('pseudo_level').points:
-                    alphas.data[:,i,:] = alphas.data[:,i,:] * self.frac.data
+            else:                
+                for tile in range(alphas.shape[1]):                   
+                    alphas.data[:,tile,:] = alphas.data[:,tile,:] * self.frac.data
  
 
         return alphas.collapsed('pseudo_level', iris.analysis.SUM)
