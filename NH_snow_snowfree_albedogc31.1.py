@@ -22,7 +22,9 @@ from   libs.ExtractLocation import *
 from   libs.Albedo          import Albedo
 from   libs.plot_temporals  import *
 
-from   libs.plot_maps    import *
+from   libs.plot_maps     import *
+from   libs.plotRegions   import *
+from   libs.plotSWoverSW  import *
 
 ###############################################
 ## Setup                                     ##
@@ -53,6 +55,8 @@ north       = [ None   ,  65.0,  55.0,  50.0 ,  55.0  ]
 fign    = 'albedos_gc3.1'
 ttle    = 'albedos'
 unit    = 'albedo'
+
+mod_dir_SW_  = 'u-ak518/SW/'
 
 ###############################################
 ## Open data                                 ##
@@ -105,7 +109,7 @@ albedo = Albedo(frac, lais, soilAlb,
 
 
 ## annual cell albedo
-cell_albedo  = albedo.cell()
+cell_sf_albedo  = albedo.cell()
 ###############################################
 ## Basic Albedo plots                        ##
 ###############################################
@@ -116,21 +120,25 @@ plot_cubes_map_ordered(albedo.tiles(), 'pink',
                'figs/constructed_tile_albedos.png',
                'albedo')#, figXscale = 4)
 
-plot_cubes_map(cell_albedo, monthNames, 'pink',
+plot_cubes_map(cell_sf_albedo, monthNames, 'pink',
                albedoLevels, 'max',
                'figs/constructed_monthly_albedos.png',
                'albedo')#, figXscale = 4)
 
 
-def plotRegion(regionName, *args, **kw):
-    dat = ExtractLocation(cell_albedo, *args, **kw).cubes
-    figN = fign + '-' + regionName + '-'
+#def plotRegion(regionName, *args, **kw):
+#    dat = ExtractLocation(cell_albedo, *args, **kw).cubes
+#    figN = fign + '-' + regionName + '-'#
 
-    plotClimatology(dat, 'u-ak508', figN, mnthLength = 1,
-                    timeCollapse = iris.analysis.MEAN, nyrNormalise = False,
-                    levels = albedoLevels, units = '')
+#    plotClimatology(dat, 'u-ak508', figN, mnthLength = 1,
+#                    timeCollapse = iris.analysis.MEAN, nyrNormalise = False,
+#                    levels = albedoLevels, units = '')
 
-for r, e, w, s, n in zip(regionNames, east, west, south, north):
-    plotRegion(r, east = e, west = w, south = s, north = n)
+#for r, e, w, s, n in zip(regionNames, east, west, south, north):
+#    plotRegion(r, east = e, west = w, south = s, north = n)
+
+
+plotAllRegions(cell_sf_albedo, fign + 'snow_free', jobID = mod_dir_SW_[0:7], levels = albedoLevels)
+plotSWoverSW(mod_dir_SW_, fign, jobID = mod_dir_SW_[0:7], levels = albedoLevels)
 
 

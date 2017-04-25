@@ -12,8 +12,10 @@ north       = [ None   ,  65.0,  55.0,  50.0 ,  55.0  ]
 def plotRegion(dat, fign, regionName, jobID, levels, units = 'albedo', *args, **kw):
     dat = ExtractLocation(dat, *args, **kw).cubes
     figN = fign + '-' + regionName + '-'
-    plotInterAnnual(dat, jobID, figN, mnthLength = 1,
-                    timeCollapse = iris.analysis.MEAN, levels = levels, units = units)
+    
+    if len(dat.coord('time').points) > 12:
+        plotInterAnnual(dat, jobID, figN, mnthLength = 1,
+                        timeCollapse = iris.analysis.MEAN, levels = levels, units = units)
 
     plotClimatology(dat, jobID, figN, mnthLength = 1,
                     timeCollapse = iris.analysis.MEAN, nyrNormalise = False,

@@ -10,6 +10,7 @@ from   libs                 import git_info
 from   libs.load_stash      import *
 from   libs.Albedo          import Albedo
 from   libs.plotRegions     import *
+from   libs.plotSWoverSW    import *
 
 from   pdb   import set_trace as browser  
 
@@ -62,12 +63,4 @@ sf_albedo = Albedo(frac, lais, soilAlb, dict(zip(tile_lev, alph_inf)),
 cell_sf_albedo  = sf_albedo.cell()
 
 plotAllRegions(cell_sf_albedo, fign + 'snow_free', jobID = mod_dir_veg[0:7], levels = levels)
-
-def plotSWoverSW(mod_dir, fign, *args, **kw):
-    files   = sort(listdir_path(data_dir + mod_dir))[0:120]
-    SWd     = load_stash(files, SWd__code, 'SWdown' )
-    SWu     = load_stash(files, SWu__code, 'SWup')
-    albedo  = SWu/SWd
-    plotAllRegions(albedo, fign + 'all', *args, **kw)
-
 plotSWoverSW(mod_dir_SW_, fign, jobID = mod_dir_veg[0:7], levels = levels)

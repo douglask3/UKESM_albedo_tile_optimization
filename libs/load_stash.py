@@ -4,16 +4,20 @@ from   pylab import sort
 from   libs.ExtractLocation import *
 from   libs.listdir_path import *
 
-def load_stash(files, code, name, units = None):
+def load_stash_dir(dir, *args, **kw):
+    files = listdir_path(dir)[0:24]
+    return load_stash(files, *args, **kw)
+
+def load_stash(files, code, name = None, units = None):
     print name
     print code
     
     stash_constraint = iris.AttributeConstraint(STASH = code)
     cube = iris.load(files, stash_constraint)[0]
 
-    cube.var_name = name
+    if name  is not None: cube.var_name = name
     cube.standard_name = None
-    if (units is not None): cube.units = units
+    if units is not None: cube.units = units
     return cube   
 
 def loadCube(dir, data_dir, code = None, *args, **kw):

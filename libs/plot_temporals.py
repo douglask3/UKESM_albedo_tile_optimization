@@ -27,16 +27,11 @@ def plotInterAnnual(dat, jbName, figN, mnthLength = 30, timeCollapse = iris.anal
                        *args, **kw)
     return mclim, aclim, labels
 
-
-def plotClimatology(dat, jbName, figN, mnthLength = 30,
-                    timeCollapse = iris.analysis.SUM,  nyrNormalise = True, *args, **kw):
-    ## convert to same as function above
-    yrLength = 12 * mnthLength
-   
-    dclim = dat[0:yrLength].copy()
+def convert2Climatology(dat, mnthLength = 30,
+                        timeCollapse = iris.analysis.SUM, nyrNormalise = True):
     
-
-    ## convert to climatology
+    yrLength = 12 * mnthLength
+    dclim = dat[0:yrLength].copy()
     nyrs = np.floor(dat.shape[0] / yrLength) if nyrNormalise else 1.0
     
     for t in range(0, yrLength):
@@ -49,7 +44,12 @@ def plotClimatology(dat, jbName, figN, mnthLength = 30,
             mclim.data[mn] = dclim[md:(md+30)].collapsed('time', timeCollapse).data
     else:
         mclim = dclim
+    
+    return mclim
 
+def plotClimatology(dat, jbName, figN, mnthLength = 30,
+                    timeCollapse = iris.analysis.SUM,  nyrNormalise = True, *args, **kw):
+    mclim = convert2Climatology(dat,  mnthLength, timeCollapse, nyrNormalise)
     mclim = plotMapsTS(mclim, figN + 'clim', jbName,
                        *args, **kw)
     return mclim, mclim, 'JFMAMJJASOND'
