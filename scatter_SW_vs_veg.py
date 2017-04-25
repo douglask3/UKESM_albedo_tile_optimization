@@ -136,7 +136,7 @@ def PlotRegion(rname, *args, **kw):
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
     plt.gcf().text(.18, .05, git, fontsize = 8)
     
-    plt.suptitle(rname)
+    plt.suptitle(rname, fontsize = 30)
     savefig('figs/gc3p1_to_ukesm05_albedo_frac-' + rname + '.png')
 
 for r, e, w, s, n in zip(regionNames, east, west, south, north):
