@@ -15,6 +15,7 @@ from libs import git_info
 from libs.listdir_path import *
 from libs.load_stash import *
 from libs.plotSWoverSW import *
+from libs.plotRegions import *
 
 # Define paths and parameters
 gc3p1_frac_file = '../UKESM_veg_redistribution/data/qrparm.veg.frac'
@@ -66,14 +67,17 @@ diff_albd = convert2Climatology(diff_albd, mnthLength = 1)
 xplot = diff_albd.shape[0]
 yplot = diff_frac.shape[0]
 
-def plot_Month_scatter(m, f, nplot, frac_lab, albd_lab):
+def plot_Month_scatter(alb, frc, m, f, nplot, frac_lab, albd_lab):
     plt.subplot(xplot, yplot, nplot)
-    xd = diff_frac[f].data.flatten()
-    yd = diff_albd[m].data.flatten()
+    xd = frc[f].data.flatten()
+    yd = alb[m].data.flatten()
 
-    mask = np.invert(xd.mask)
-    xd = xd[mask]
-    yd = yd[mask]
+    try:
+        mask = np.invert(xd.mask)
+        xd = xd[mask]
+        yd = yd[mask]
+    except:
+        pass
 
     mask = np.invert(np.isnan(xd + yd))
     xd = xd[mask]
@@ -84,44 +88,58 @@ def plot_Month_scatter(m, f, nplot, frac_lab, albd_lab):
     xd = xd[reorder]
     yd = yd[reorder]
 
-    plt.scatter(xd, yd, s=30, alpha=0.15, marker='o')
+    plt.scatter(xd, yd, s=30, alpha=0.15, marker='o')   
 
-    par = np.polyfit(xd, yd, 1, full=True)
+    try:
+        par = np.polyfit(xd, yd, 1, full=True)
 
-    slope = par[0][0]
-    intercept = par[0][1]
-    xl = [min(xd), max(xd)]
-    yl = [slope*xx + intercept  for xx in xl]
+        slope = par[0][0]
+        intercept = par[0][1]
+        xl = [min(xd), max(xd)]
+        yl = [slope*xx + intercept  for xx in xl]
 
-    # coefficient of determination, plot text
-    variance = np.var(yd)
-    residuals = np.var([(slope*xx + intercept - yy)  for xx,yy in zip(xd,yd)])
-    Rsqr = np.round(1-residuals/variance, decimals=2)
-    plt.text(.6*max(xd)+.4*min(xd),.9*max(yd)+.1*min(yd),'$R^2 = %0.2f$'% Rsqr, fontsize=20)
+        # coefficient of determination, plot text
+        variance = np.var(yd)
+        residuals = np.var([(slope*xx + intercept - yy)  for xx,yy in zip(xd,yd)])
+        Rsqr = np.round(1-residuals/variance, decimals=2)
+        plt.text(.6*max(xd)+.4*min(xd),.9*max(yd)+.1*min(yd),'$R^2 = %0.2f$'% Rsqr, fontsize=20)
 
-    plt.xlabel(frac_lab)
-    plt.ylabel(albd_lab)
+        plt.xlabel(frac_lab)
+        plt.ylabel(albd_lab)
 
-    # error bounds
-    yerr = [abs(slope*xx + intercept - yy)  for xx,yy in zip(xd,yd)]
-    par = np.polyfit(xd, yerr, 2, full=True)
+        # error bounds
+        yerr = [abs(slope*xx + intercept - yy)  for xx,yy in zip(xd,yd)]
+        par = np.polyfit(xd, yerr, 2, full=True)
 
-    yerrUpper = [(xx*slope+intercept)+(par[0][0]*xx**2 + par[0][1]*xx + par[0][2]) for xx,yy in zip(xd,yd)]
-    yerrLower = [(xx*slope+intercept)-(par[0][0]*xx**2 + par[0][1]*xx + par[0][2]) for xx,yy in zip(xd,yd)]
+        yerrUpper = [(xx*slope+intercept)+(par[0][0]*xx**2 + par[0][1]*xx + par[0][2]) for xx,yy in zip(xd,yd)]
+        yerrLower = [(xx*slope+intercept)-(par[0][0]*xx**2 + par[0][1]*xx + par[0][2]) for xx,yy in zip(xd,yd)]
 
-    plt.plot(xl, yl, '-r')
-    plt.plot(xd, yerrLower, '--r')
-    plt.plot(xd, yerrUpper, '--r')
+        plt.plot(xl, yl, '-r')
+        plt.plot(xd, yerrLower, '--r')
+        plt.plot(xd, yerrUpper, '--r')
+    except:
+        pass
     
+def PlotRegion(rname, *args, **kw):
+    alb = ExtractLocation(diff_albd, *args, **kw).cubes
+    frc = ExtractLocation(diff_frac, *args, **kw).cubes
+    
+    plt.figure(figsize = (42, 31.5))
+    nplot = 0
+    for i in range(xplot):
+        for j in range(yplot):
+            nplot = nplot + 1
+            xlab = tile_9names[j] if i == (xplot - 1)  else ""
+            ylab = 'JFMAMJJASOND'[i] if j == 0 else ""
+            plot_Month_scatter(alb, frc, i, j, nplot, xlab, ylab)
+    
+    git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
+    plt.gcf().text(.18, .05, git, fontsize = 8)
+    
+    plt.suptitle(rname)
+    savefig('figs/gc3p1_to_ukesm05_albedo_frac-' + rname + '.png')
 
-plt.figure(figsize = (42, 31.5))
-nplot = 0
-for i in range(xplot):
-    for j in range(yplot):
-        nplot = nplot + 1
-        xlab = tile_9names[j] if i == (xplot - 1)  else ""
-        ylab = 'JFMAMJJASOND'[i] if j == 0 else ""
-        plot_Month_scatter(i, j, nplot, xlab, ylab)
+for r, e, w, s, n in zip(regionNames, east, west, south, north):
+    PlotRegion(r, east = e, west = w, south = s, north = n)
 
-savefig('yay.png')
-browser()
+
