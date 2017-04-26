@@ -56,7 +56,7 @@ fign    = 'albedos_gc3.1'
 ttle    = 'albedos'
 unit    = 'albedo'
 
-mod_dir_SW_  = 'u-ak518/SW/'
+mod_dir_SW_  = 'u-ak508/SW/'
 
 ###############################################
 ## Open data                                 ##
