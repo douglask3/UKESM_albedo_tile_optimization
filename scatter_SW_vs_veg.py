@@ -28,6 +28,7 @@ SWd__code = 'm01s01i210'
 SWu__code = 'm01s01i211'
 
 mapFigFile = "albedoClim"
+mapFigFileFrac = "fracCover"
 fig_file   = "figs/fracChangeVsAlbedo.png"
 
 tile_9names  = ['BL', 'NL', 'C3', 'C4', 'Shrub', 'Urban', 'Water', 'Soil', 'Ice']
@@ -64,6 +65,9 @@ for i in range(1,10):
 
 diff_frac = ukesm_groups.copy()
 diff_frac.data -= gc3p1_frac.data
+
+plotAllRegions(diff_frac, mapFigFileFrac + 'uksem-gc3p1', jobID = 'ak518-ak508',
+               levels = dalbedoLevels, cmap = 'brewer_PiYG_11', nms = tile_9names)
 
 diff_albd = ukesm_albd.copy()
 diff_albd.data -= gc3p1_albd.data

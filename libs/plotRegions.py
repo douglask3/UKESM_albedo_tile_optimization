@@ -9,10 +9,19 @@ west        = [ None   , 310.0, 295.0, 105.0 , 105.0  , 105.0  ]
 south       = [ None   ,  50.0,  45.0,  35.0 ,  45.0  , 30.0   ]
 north       = [ None   ,  65.0,  55.0,  50.0 ,  55.0  , 40.0   ]
 
-def plotRegion(dat, fign, regionName, jobID, levels, units = 'albedo', cmap = "pink", *args, **kw):
+def plotRegion(dat, fign, regionName, jobID, levels, units = 'albedo', cmap = "pink",
+              nms = None, *args, **kw):
     dat = ExtractLocation(dat, *args, **kw).cubes
     figN = fign + '-' + regionName + '-'
-    
+
+#plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
+#                   figName = None, units = '', nx = None, ny = None, 
+##                   cbar_yoff = 0.0, figXscale = 1.0, figYscale = 1.0, 
+ #                  totalMap = None, *args, **kw):
+    if len(dat.coord('time').points) == 1:
+        plot_cubes_map(dat, nms, cmap, levels, figName = 'figs/' + figN, projection = None,
+                        figYscale = 0.5)
+        return 
     if len(dat.coord('time').points) > 12:
         plotInterAnnual(dat, jobID, figN, mnthLength = 1,
                         timeCollapse = iris.analysis.MEAN,

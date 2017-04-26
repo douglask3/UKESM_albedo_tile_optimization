@@ -78,6 +78,7 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
         if figName == 'show':
             plt.show()
         else :
+            print(figName)
             plt.savefig(figName, bbox_inches='tight')
             plt.clf()
 
