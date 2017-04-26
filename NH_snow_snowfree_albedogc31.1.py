@@ -142,3 +142,4 @@ plotAllRegions(cell_sf_albedo, fign + 'snow_free', jobID = mod_dir_SW_[0:7], lev
 plotSWoverSW(mod_dir_SW_, fign, jobID = mod_dir_SW_[0:7], levels = albedoLevels)
 
 
+
