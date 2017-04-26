@@ -5,7 +5,7 @@ from   libs.ExtractLocation import *
 from   libs.listdir_path import *
 
 def load_stash_dir(dir, *args, **kw):
-    files = listdir_path(dir)[0:24]
+    files = listdir_path(dir)[0:120]
     return load_stash(files, *args, **kw)
 
 def load_stash(files, code, name = None, units = None):

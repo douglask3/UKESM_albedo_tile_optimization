@@ -17,7 +17,7 @@ def openSWoverSW(mod_dir,
 
     files   = sort(listdir_path(data_dir + mod_dir))
     print(mod_dir)
-    if len(files) > 24: files = files[0:24]
+    if len(files) > 24: files = files[0:120]
 
     SWd     = load_stash(files, SWd__code, 'SWdown' )
     SWu     = load_stash(files, SWu__code, 'SWup')
