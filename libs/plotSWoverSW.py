@@ -9,6 +9,7 @@ def plotSWoverSW(mod_dir, fign,
                  data_dir = 'data/', *args, **kw):
     albedo = openSWoverSW(mod_dir, SWd__code, SWu__code, data_dir)
     plotAllRegions(albedo, fign + 'all', *args, **kw)
+    return albedo
 
 def openSWoverSW(mod_dir,
                  SWd__code = 'm01s01i210', SWu__code = 'm01s01i211', 

@@ -26,12 +26,16 @@ ukesm__SW__file = 'u-ak518/SW/'
 
 SWd__code = 'm01s01i210'
 SWu__code = 'm01s01i211'
-   
+
+mapFigFile = "albedoClim"
 fig_file   = "figs/fracChangeVsAlbedo.png"
 
 tile_9names  = ['BL', 'NL', 'C3', 'C4', 'Shrub', 'Urban', 'Water', 'Soil', 'Ice']
 pft_27_2_9   = [  3,   4,   6,   7,   8,   9, 1, 1, 1, 2, 2, 3, 3,
        4, 4, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9] 
+
+albedoLevels  = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
+dalbedoLevels = [-1, -0.5, -0.2, -0.1, -0.05, -0.02, 0.02, 0.05, 0.1, 0.2, 0.5, 1]
 
 ###############################################
 ## Load mask and remove coordinate system    ##
@@ -41,10 +45,12 @@ git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
 pxs = [3, 6, 7]
 pys = [4, 4, 5]
 
-gc3p1_albd = openSWoverSW(gc3p1__SW__file)
+gc3p1_albd = plotSWoverSW(gc3p1__SW__file, mapFigFile + 'gcsp1',
+                          jobID = 'u-ak508', levels = albedoLevels)
 gc3p1_frac = iris.load_cube(gc3p1_frac_file)
 
-ukesm_albd = openSWoverSW(ukesm__SW__file)
+ukesm_albd = plotSWoverSW(ukesm__SW__file, mapFigFile + 'uksem', jobID = 'u-ak518', 
+                          levels = albedoLevels)
 ukesm_frac = load_stash_dir(ukesm_frac_file, 'm01s19i013')
 ukesm_frac = ukesm_frac.collapsed('time', iris.analysis.MEAN)
 
@@ -62,7 +68,12 @@ diff_frac.data -= gc3p1_frac.data
 diff_albd = ukesm_albd.copy()
 diff_albd.data -= gc3p1_albd.data
 
+plotAllRegions(diff_albd, mapFigFile + 'uksem-gc3p1', jobID = 'ak518-ak508',
+               levels = dalbedoLevels, cmap = 'brewer_Spectral_11')
+
 diff_albd = convert2Climatology(diff_albd, mnthLength = 1)
+diff_frac.coord('latitude' ).guess_bounds()
+diff_frac.coord('longitude').guess_bounds()
 
 xplot = diff_albd.shape[0]
 yplot = diff_frac.shape[0]
@@ -78,8 +89,9 @@ def plot_Month_scatter(alb, frc, m, f, nplot, frac_lab, albd_lab):
         yd = yd[mask]
     except:
         pass
-
+    
     mask = np.invert(np.isnan(xd + yd))
+    
     xd = xd[mask]
     yd = yd[mask]
     
@@ -124,6 +136,8 @@ def PlotRegion(rname, *args, **kw):
     alb = ExtractLocation(diff_albd, *args, **kw).cubes
     frc = ExtractLocation(diff_frac, *args, **kw).cubes
     
+    if frc.shape[1] != alb.shape[1]: browser()
+    
     plt.figure(figsize = (42, 31.5))
     nplot = 0
     for i in range(xplot):
@@ -138,6 +152,7 @@ def PlotRegion(rname, *args, **kw):
     
     plt.suptitle(rname, fontsize = 30)
     savefig('figs/gc3p1_to_ukesm05_albedo_frac-' + rname + '.png')
+
 
 for r, e, w, s, n in zip(regionNames, east, west, south, north):
     PlotRegion(r, east = e, west = w, south = s, north = n)
