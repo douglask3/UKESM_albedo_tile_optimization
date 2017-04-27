@@ -79,8 +79,8 @@ diff_albd = convert2Climatology(diff_albd, mnthLength = 1)
 diff_frac.coord('latitude' ).guess_bounds()
 diff_frac.coord('longitude').guess_bounds()
 
-xplot = diff_albd.shape[0]
-yplot = diff_frac.shape[0]
+xplot = 4#diff_albd.shape[0]
+yplot = 4#diff_frac.shape[0]
 
 def plot_Month_scatter(alb, frc, m, f, nplot, frac_lab, albd_lab):
     plt.subplot(xplot, yplot, nplot)
@@ -142,13 +142,13 @@ def PlotRegion(rname, *args, **kw):
     
     if frc.shape[1] != alb.shape[1]: browser()
     
-    plt.figure(figsize = (42, 31.5))
+    plt.figure(figsize = (16, 16))
     nplot = 0
-    for i in range(xplot):
-        for j in range(yplot):
+    for i in [11,0,1,2]:
+        for j in [1, 2, 4, 7]:
             nplot = nplot + 1
-            xlab = tile_9names[j] if i == (xplot - 1)  else ""
-            ylab = 'JFMAMJJASOND'[i] if j == 0 else ""
+            xlab = tile_9names[j] if i == 2  else ""
+            ylab = 'JFMAMJJASOND'[i] if j == 1 else ""
             plot_Month_scatter(alb, frc, i, j, nplot, xlab, ylab)
     
     git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
