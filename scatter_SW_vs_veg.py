@@ -17,12 +17,13 @@ from libs.load_stash import *
 from libs.plotSWoverSW import *
 from libs.plotRegions import *
 
+jobID = 'u-al888'
 # Define paths and parameters
 gc3p1_frac_file = '../UKESM_veg_redistribution/data/qrparm.veg.frac'
-ukesm_frac_file = 'data/u-ak518/u-ak518/'
+ukesm_frac_file = 'data/' + jobID +'/' + jobID +'/'
 
 gc3p1__SW__file = 'u-ak508/SW/'
-ukesm__SW__file = 'u-ak518/SW/'
+ukesm__SW__file = jobID +'/SW/'
 
 SWd__code = 'm01s01i210'
 SWu__code = 'm01s01i211'
@@ -50,7 +51,7 @@ gc3p1_albd = plotSWoverSW(gc3p1__SW__file, mapFigFile + 'gcsp1',
                           jobID = 'u-ak508', levels = albedoLevels)
 gc3p1_frac = iris.load_cube(gc3p1_frac_file)
 
-ukesm_albd = plotSWoverSW(ukesm__SW__file, mapFigFile + 'uksem', jobID = 'u-ak518', 
+ukesm_albd = plotSWoverSW(ukesm__SW__file, mapFigFile + 'uksem', jobID = jobID, 
                           levels = albedoLevels)
 ukesm_frac = load_stash_dir(ukesm_frac_file, 'm01s19i013')
 ukesm_frac = ukesm_frac.collapsed('time', iris.analysis.MEAN)
@@ -66,13 +67,13 @@ for i in range(1,10):
 diff_frac = ukesm_groups.copy()
 diff_frac.data -= gc3p1_frac.data
 
-plotAllRegions(diff_frac, mapFigFileFrac + 'uksem-gc3p1', jobID = 'ak518-ak508',
+plotAllRegions(diff_frac, mapFigFileFrac + 'uksem-gc3p1', jobID = jobID +'-ak508',
                levels = dalbedoLevels, cmap = 'brewer_PiYG_11', nms = tile_9names)
 
 diff_albd = ukesm_albd.copy()
 diff_albd.data -= gc3p1_albd.data
 
-plotAllRegions(diff_albd, mapFigFile + 'uksem-gc3p1', jobID = 'ak518-ak508',
+plotAllRegions(diff_albd, mapFigFile + 'uksem-gc3p1', jobID = jobID +'-ak508',
                levels = dalbedoLevels, cmap = 'brewer_Spectral_11')
 
 diff_albd = convert2Climatology(diff_albd, mnthLength = 1)
