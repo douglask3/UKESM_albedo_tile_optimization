@@ -4,8 +4,8 @@ from   libs.plot_temporals  import *
 from   libs.ExtractLocation import *
 
 regionNames = ['global', 'NA' , 'NA2', 'Asia', 'Asia2', 'Asia3', 'NA3', 'Asia4']
-east        = [ None   , 260.0, 275.0,  80.0 ,  80.0  , 80     , 245.0, 100.0]
-west        = [ None   , 310.0, 295.0, 105.0 , 105.0  , 105.0  , 275.0, 30.0 ]
+east        = [ None   , 260.0, 275.0,  80.0 ,  80.0  , 80     , 245.0, 30.0]
+west        = [ None   , 310.0, 295.0, 105.0 , 105.0  , 105.0  , 275.0, 100.0 ]
 south       = [ None   ,  50.0,  45.0,  35.0 ,  45.0  , 30.0   , 30.0,  45.0]
 north       = [ None   ,  65.0,  55.0,  50.0 ,  55.0  , 40.0   , 50.0 , 60.0]
 
