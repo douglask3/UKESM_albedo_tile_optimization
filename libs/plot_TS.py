@@ -54,5 +54,5 @@ def plot_cube_TS(cubes, running_mean, xticksLabs = None, ylabel = ''):
     plt.legend(ncol = 2, loc = 0)
     plt.grid(True)    
     plt.axis('tight')
-    
+    plt.gca().set_ylim([-0.25,0.05])
     plt.gca().set_ylabel(cubes[0].units, fontsize=16)
