@@ -40,7 +40,7 @@ def cube_TS(cube, running_mean = False):
     if (running_mean): cube.data = running_N_mean(cube.data, 12)
     return cube   
 
-def plot_cube_TS(cubes, running_mean, xticksLabs = None, ylabel = ''):    
+def plot_cube_TS(cubes, running_mean, xticksLabs = None, ylabel = '', ylim = None):    
     cubes = [cube_TS(cube, running_mean) for cube in cubes]    
     
     for cube in cubes:
@@ -54,5 +54,5 @@ def plot_cube_TS(cubes, running_mean, xticksLabs = None, ylabel = ''):
     plt.legend(ncol = 2, loc = 0)
     plt.grid(True)    
     plt.axis('tight')
-    plt.gca().set_ylim([-0.25,0.05])
+    if ylim is not None: plt.gca().set_ylim([-0.25,0.05])
     plt.gca().set_ylabel(cubes[0].units, fontsize=16)

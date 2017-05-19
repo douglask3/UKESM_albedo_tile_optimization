@@ -69,13 +69,15 @@ def pltJob(jobID, pltFrc):
         diff_frac.data -= gc3p1_frac.data
 
         plotAllRegions(diff_frac, mapFigFileFrac + 'uksem-gc3p1', jobID = jobID +'-ak508',
-                       levels = dalbedoLevels, cmap = 'brewer_PiYG_11', nms = tile_9names)
+                       levels = dalbedoLevels, cmap = 'brewer_PiYG_11', nms = tile_9names,
+                       tsYlim = [-0.25, 0.05] )
 
     diff_albd = ukesm_albd[0:30].copy()
     diff_albd.data -= gc3p1_albd.data[0:30]
 
     plotAllRegions(diff_albd, mapFigFile + 'uksem-gc3p1', jobID = jobID +'-ak508',
-                  levels = dalbedoLevels, cmap = 'brewer_Spectral_11')
+                  levels = dalbedoLevels, cmap = 'brewer_Spectral_11',
+                       tsYlim = [-0.25, 0.05])
     if not pltFrc: return diff_albd
     diff_albd = convert2Climatology(diff_albd, mnthLength = 1)
     diff_frac.coord('latitude' ).guess_bounds()
