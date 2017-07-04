@@ -36,11 +36,16 @@ tile_nme = ['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SH
 alph_inf = [0.1 ,0.1  ,0.1  ,0.1  ,0.1  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.18   ,0.06  , -1.0       , 0.75]
 alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,None   ,None  ,None       ,None ]
 
+alph_grp = [101, 101, 101, 201, 201, 3, 3, 3, 3, 3, 3, 501, 501, 6, 7, 8, 9]
+
 minFracTests = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
 
 albedoLevels = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
+prePlots = False
+testOrderPlots = False
 
 ###############################################
 ## Open data                                 ##
@@ -58,6 +63,7 @@ for i in range(0, 12):
 lais = lais.merge()[0]
 lais_reorder = lais.copy()
 lais_reorder.data[:] = 0.0
+
 mn = pft = 0
 
 for j in range(0, 13):
@@ -98,33 +104,35 @@ def plot_cubes_map_ordered(cube, *args, **kw):
     plot_cubes_map(cube, nms, figXscale = 4, *args, **kw)
 
 
-#plot_cubes_map_ordered(frac, 'brewer_Greens_09',
-#                       [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], 'max',
-#                       'figs/N96e_GA7_17_tile_cci_reorder.png',
-#                       'fractional cover')
+if prePlots:
+    plot_cubes_map_ordered(frac, 'brewer_Greens_09',
+                           [0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5], 'max',
+                          'figs/N96e_GA7_17_tile_cci_reorder.png',
+                          'fractional cover')
 
-#plot_cubes_map_ordered(mxLAI, 'brewer_Greens_09',
-#                       [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
-#                       'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
-#                       'LAI')
+    plot_cubes_map_ordered(mxLAI, 'brewer_Greens_09',
+                           [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
+                           'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
+                           'LAI')
 
-#for mn in range(0,12):
-#    plot_cubes_map_ordered(lais0[mn], 'brewer_Greens_09',
-#                           [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
-#                           'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'month' + str(mn) + '.png',
-#                           'LAI')
-
-for pft in range(0, 13):
-    plot_cubes_map(lais[:, pft, :, :], monthNames, 'brewer_Greens_09',
-               [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
-               'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
-               'LAI', figXscale = 4)
+    if testOrderPlots:
+        for mn in range(0,12):
+            plot_cubes_map_ordered(lais0[mn], 'brewer_Greens_09',
+                                   [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
+                                   'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'month' + str(mn) + '.png',
+                                   'LAI')
+    
+        for pft in range(0, 13):
+            plot_cubes_map(lais[:, pft, :, :], monthNames, 'brewer_Greens_09',
+                           [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
+                          'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
+                          'LAI', figXscale = 4)
 
     
-    plot_cubes_map(lais_reorder[:, pft, :, :], monthNames, 'brewer_Greens_09',
-               [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
-               'figs/N96e_GA7_qrparm.veg.13.pft.217.func_reordered' + 'tile' + str(pft) + '.png',
-               'LAI', figXscale = 4)
+            plot_cubes_map(lais_reorder[:, pft, :, :], monthNames, 'brewer_Greens_09',
+                          [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
+                          'figs/N96e_GA7_qrparm.veg.13.pft.217.func_reordered' + 'tile' + str(pft) + '.png',
+                          'LAI', figXscale = 4)
 
 ###############################################
 ## Pre-optimization plots                    ##
@@ -137,17 +145,19 @@ def nTilesGT(frac, x, ai, ak):
 
 
 ntiles = [nTilesGT(frac, i, None, None) for i in minFracTests]
-#plot_cubes_map(ntiles, minFracTests, 'brewer_PuBuGn_09',
-#               [0, 1, 2, 4, 6, 8], 'max',
-#               'figs/nTilesGTx.png',
-#               'no. tiles')
+if prePlots:
+    plot_cubes_map(ntiles, minFracTests, 'brewer_PuBuGn_09',
+                   [0, 1, 2, 4, 6, 8], 'max',
+                   'figs/nTilesGTx.png',
+                   'no. tiles')
 
-ntiles = [nTilesGT(frac, i, j, k) for (i, j, k) in zip(minFracTests, 
-                                                    alph_infIndex, alph_kIndex)]
-#plot_cubes_map(ntiles, minFracTests, 'brewer_RdPu_09',
-#               [0, 3, 6, 9, 12], 'max',
-#               'figs/nParamsGTx.png',
-#               'no. Params')
+ntiles = [nTilesGT(frac, i, j, k) for (i, j, k) in zip(minFracTests, alph_infIndex, alph_kIndex)]
+
+if prePlots:                                                    
+    plot_cubes_map(ntiles, minFracTests, 'brewer_RdPu_09',
+                   [0, 3, 6, 9, 12], 'max',
+                   'figs/nParamsGTx.png',
+                   'no. Params')
 
 ###############################################
 ## Albedo construction                       ##
@@ -163,24 +173,33 @@ cellAlbedo = albedo.cell(True)
 ## Basic Albedo plots                        ##
 ###############################################
 ## tile albedo
-
-plot_cubes_map_ordered(albedo.tiles(), 'pink',
-               albedoLevels, 'max',
-               'figs/constructed_tile_albedos.png',
-               'albedo', figXscale = 4)
-
-plot_cubes_map(albedo.cell(), monthNames, 'pink',
-               albedoLevels, 'max',
-               'figs/constructed_monthly_albedos.png',
-               'albedo', figXscale = 4)
+if prePlots:
+    plot_cubes_map_ordered(albedo.tiles(), 'pink',
+                           albedoLevels, 'max',
+                          'figs/constructed_tile_albedos.png',
+                          'albedo')
+ 
+    plot_cubes_map(albedo.cell(), monthNames, 'pink',
+                 albedoLevels, 'max',
+                'figs/constructed_monthly_albedos.png',
+                'albedo', figXscale = 4)
 
 constructed = albedo.cell(True)
 
 observed = iris.load(Albe_file)[0]
 aobserved = observed.collapsed('time', iris.analysis.MEAN)
-plot_cubes_map([constructed, aobserved], ['constructed', 'observed'], 'pink',
-               albedoLevels, 'max',
-               'figs/compare_albedos.png',
-               'albedo', figXscale = 4)
+if prePlots:
+    plot_cubes_map([constructed, aobserved], ['constructed', 'observed'], 'pink',
+                   albedoLevels, 'max',
+                  'figs/compare_albedos.png',
+                  'albedo', figXscale = 4)
+
+optimized_alpha_inf = albedo.optimize(observed, dict(zip(tile_lev, alph_grp)))
+
+
+albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, dict(zip(tile_lev, alph_k))).cell(True)
+
+
+plot_cubes_map([constructed, albedoOptimized, aobserved], ['constructed', 'optimized', 'observed'], 'pink',  albedoLevels, 'max',  'figs/compare_albedos.png',  'albedo', figXscale = 4)
 
 browser()
