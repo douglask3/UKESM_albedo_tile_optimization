@@ -128,7 +128,7 @@ class Albedo(object):
         
  
         bounds = [(0.0, 1.0) if i >= 0.0 else (-1.0, 1.0) for i in start]
-        res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'xtol': 1e-3, 'disp': True, 'int': 3})
+        res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'xtol': 1e-3, 'disp': True})
         
         alpha_inf = self.Initials(res.x, self.indexInverse)
         self.alpha_inf = dict(zip( self.frac.coord('pseudo_level').points, alpha_inf))
