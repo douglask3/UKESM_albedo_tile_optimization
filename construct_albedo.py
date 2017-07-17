@@ -25,18 +25,18 @@ from   libs.plot_maps    import *
 ## Setup                                     ##
 ###############################################
 Albe_file = 'data/qrclim.land'
-Frac_file = 'data/N96e_GA7_17_tile_cci_reorder.anc'
-LAI__file = 'data/N96e_GA7_qrparm.veg.13.pft.217.func.anc'
+Frac_file = 'data/qrparm_frac_27_tile_orca1_cci.anc'
+LAI__file = 'data/qrparm_func_orca1_13_tile.anc'
 slAb_file = 'data/qrparm.soil'
 slAb_varn = 'soil_albedo'
 
-tile_lev = [101 ,102  ,103  ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,402  ,501  ,502  ,6      , 7    , 8         , 9   ]
-tile_nme = ['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice']
+tile_lev = [101 ,102  ,103  ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,402  ,501  ,502  ,6      , 7    , 8         , 9    , 901, 902, 903, 904, 905, 906, 907, 908, 909, 910]
+tile_nme = ['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice', 'Ice1', 'Ice2', 'Ice3', 'Ice4', 'Ice5', 'Ice6', 'Ice7', 'Ice9', 'Ice9', 'Ice10']
 
-alph_inf = [0.1 ,0.1  ,0.1  ,0.1  ,0.1  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.18   ,0.06  , -1.0       , 0.75]
-alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,None   ,None  ,None       ,None ]
+alph_inf = [0.1 ,0.1  ,0.1  ,0.1  ,0.1  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.18   ,0.06  , -1.0       , 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75]
+alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,None   ,None  ,None       ,None,None ,None ,None ,None ,None ,None ,None ,None ,None ,None  ]
 
-alph_grp = [101, 101, 101, 201, 201, 3, 3, 3, 3, 3, 3, 501, 501, 6, 7, 8, 9]
+alph_grp = [101, 101, 101, 201, 201, 3, 3, 3, 3, 3, 3, 501, 501, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,9]
 
 minFracTests = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
 
@@ -44,38 +44,16 @@ albedoLevels = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
-prePlots = False
-testOrderPlots = False
+prePlots = True
+testOrderPlots = True
 
 ###############################################
 ## Open data                                 ##
 ###############################################
 frac    = iris.load_cube(Frac_file)
 tileIndex = frac.coords('pseudo_level')[0].points
-lais    = iris.load(LAI__file)
+lais    = iris.load(LAI__file)[1]
 soilAlb = iris.load_cube(slAb_file, slAb_varn)
-
-lais0 =  lais
-
-for i in range(0, 12):
-    lais[i].add_aux_coord(iris.coords.DimCoord(np.int32(i),'time'))
-
-lais = lais.merge()[0]
-lais_reorder = lais.copy()
-lais_reorder.data[:] = 0.0
-
-mn = pft = 0
-
-for j in range(0, 13):
-    for i in range(0, 12):
-        if pft == 13:
-            pft = 0
-            mn = mn + 1
-        lais_reorder.data[mn, pft] = lais.data[i,j]
-        
-        pft = pft + 1
-#browser()
-#lais.data = lais_reorder.data 
 
 
 mxLAI   = lais.collapsed('time', iris.analysis.MAX)
@@ -90,6 +68,7 @@ ParaOrder = [which(tile_lev,  i)[0] for i in tileIndex]
 def reOrder(lst, idx):  
     lst = [lst[i] for i in idx] 
     return lst
+
 
 alph_infIndex = reOrder(alph_inf, ParaOrder)
 alph_kIndex   = reOrder(alph_k  , ParaOrder)
@@ -111,27 +90,20 @@ if prePlots:
                           'fractional cover')
 
     plot_cubes_map_ordered(mxLAI, 'brewer_Greens_09',
-                           [0, 1, 2, 3, 4, 5, 6, 7, 8], 'max',
+                           [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
                            'figs/N96e_GA7_qrparm.veg.13.pft.217.func.annualMax.png',
                            'LAI')
-
     if testOrderPlots:
         for mn in range(0,12):
-            plot_cubes_map_ordered(lais0[mn], 'brewer_Greens_09',
+            plot_cubes_map_ordered(lais[:, mn, :, :], 'brewer_Greens_09',
                                    [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
                                    'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'month' + str(mn) + '.png',
                                    'LAI')
     
         for pft in range(0, 13):
-            plot_cubes_map(lais[:, pft, :, :], monthNames, 'brewer_Greens_09',
+            plot_cubes_map(lais[pft], monthNames, 'brewer_Greens_09',
                            [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
                           'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
-                          'LAI', figXscale = 4)
-
-    
-            plot_cubes_map(lais_reorder[:, pft, :, :], monthNames, 'brewer_Greens_09',
-                          [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
-                          'figs/N96e_GA7_qrparm.veg.13.pft.217.func_reordered' + 'tile' + str(pft) + '.png',
                           'LAI', figXscale = 4)
 
 ###############################################
