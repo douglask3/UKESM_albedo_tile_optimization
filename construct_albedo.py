@@ -44,8 +44,8 @@ albedoLevels = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
-prePlots = True
-testOrderPlots = True
+prePlots = False
+testOrderPlots = False
 
 ###############################################
 ## Open data                                 ##
@@ -166,7 +166,7 @@ if prePlots:
                   'figs/compare_albedos.png',
                   'albedo', figXscale = 4)
 
-optimized_alpha_inf = albedo.optimize(observed, dict(zip(tile_lev, alph_grp)))
+optimized_alpha_inf = albedo.optimize(observed, dict(zip(tile_lev, alph_grp)), north = 60, south = -60)
 
 
 albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, dict(zip(tile_lev, alph_k))).cell(True)
