@@ -45,8 +45,8 @@ dalbedoLevels = [-0.5, -0.2, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.2, 0.5]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
-prePlots = True
-testOrderPlots = True
+prePlots = False
+testOrderPlots = False
 
 ###############################################
 ## Open data                                 ##
@@ -159,7 +159,7 @@ if prePlots:
 
 optimized_alpha_inf, optimized_k = albedo.optimize(observed,
                                         dict(zip(tile_lev, alph_grp)),
-                                         north = 60, south = -60)
+                                         north = 60, south = -90)
 
 albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, optimized_k)
 
