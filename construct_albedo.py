@@ -44,8 +44,8 @@ albedoLevels = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
-prePlots = False
-testOrderPlots = False
+prePlots = True
+testOrderPlots = True
 
 ###############################################
 ## Open data                                 ##
@@ -101,9 +101,11 @@ if prePlots:
                                    'LAI')
     
         for pft in range(0, 13):
+            npft = lais.coord('pseudo_level').points[pft]
+            npft = tile_nme[np.where(tile_lev == npft)[0]] + '-' + str(npft)
             plot_cubes_map(lais[pft], monthNames, 'brewer_Greens_09',
                            [0, 0.1, 0.2, 0.5, 1, 2, 5], 'max',
-                          'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + str(pft) + '.png',
+                          'figs/N96e_GA7_qrparm.veg.13.pft.217.func' + 'tile' + npft + '.png',
                           'LAI', figXscale = 4)
 
 ###############################################
@@ -170,7 +172,6 @@ optimized_alpha_inf = albedo.optimize(observed, dict(zip(tile_lev, alph_grp)), n
 
 
 albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, dict(zip(tile_lev, alph_k))).cell(True)
-
 
 plot_cubes_map([constructed, albedoOptimized, aobserved], ['constructed', 'optimized', 'observed'], 'pink',  albedoLevels, 'max',  'figs/compare_albedos.png',  'albedo', figXscale = 4)
 
