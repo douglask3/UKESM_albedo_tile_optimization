@@ -151,8 +151,8 @@ class Albedo(object):
         
  
         
-        #res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'maxiter': 5, 'xtol': 1e-1, 'disp': True}).x
-        res = [i + 0.1 for i in start]
+        res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'xtol': 1e-2, 'disp': True}).x
+        #res = [i + 0.1 for i in start]
         
         alpha_inf = self.Initials(res[:self.phalf], self.indexInverse)
         k         = self.Initials(res[self.phalf:], self.indexInverse)
