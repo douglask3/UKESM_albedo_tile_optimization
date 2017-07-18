@@ -40,12 +40,13 @@ alph_grp = [101, 101, 101, 201, 201, 3, 3, 3, 3, 3, 3, 501, 501, 6, 7, 8, 9, 9, 
 
 minFracTests = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
 
-albedoLevels = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
+albedoLevels  = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
+dalbedoLevels = [-0.5, -0.2, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.2, 0.5]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
-prePlots = True
-testOrderPlots = True
+prePlots = False
+testOrderPlots = False
 
 ###############################################
 ## Open data                                 ##
@@ -55,7 +56,7 @@ tileIndex = frac.coords('pseudo_level')[0].points
 lais    = iris.load(LAI__file)[1]
 soilAlb = iris.load_cube(slAb_file, slAb_varn)
 
-
+observed = iris.load(Albe_file)[0]
 mxLAI   = lais.collapsed('time', iris.analysis.MAX)
 
 ###############################################
@@ -139,40 +140,85 @@ if prePlots:
 albedo = Albedo(frac, lais, soilAlb,
                 dict(zip(tile_lev, alph_inf)), dict(zip(tile_lev, alph_k)))
 
-
-## annual cell albedo
-cellAlbedo = albedo.cell(True)
-
+aConstructed = albedo.cell(True)
+mConstructed = albedo.cell()
 ###############################################
 ## Basic Albedo plots                        ##
 ###############################################
 ## tile albedo
 if prePlots:
-    plot_cubes_map_ordered(albedo.tiles(), 'pink',
+    plot_cubes_map_ordered(albedoConstructed.tiles(), 'pink',
                            albedoLevels, 'max',
                           'figs/constructed_tile_albedos.png',
                           'albedo')
  
-    plot_cubes_map(albedo.cell(), monthNames, 'pink',
+    
+###############################################
+## Optimize albedo                           ##
+###############################################
+
+optimized_alpha_inf, optimized_k = albedo.optimize(observed,
+                                        dict(zip(tile_lev, alph_grp)),
+                                         north = 60, south = -60)
+
+albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, optimized_k)
+
+
+aOptimized = albedoOptimized.cell(True)
+mOptimized = albedoOptimized.cell()
+###############################################
+## Plot annual optimized                     ##
+###############################################
+aObserved = observed.collapsed('time', iris.analysis.MEAN)
+
+
+aConstructed.units = aObserved.units
+aOptimized.units = aObserved.units
+
+
+plot_cubes_map([aConstructed, aOptimized, aObserved], ['constructed', 'optimized', 'observed'], 
+               'pink',  albedoLevels, 'max',
+               'figs/compare_albedos.png',  'albedo', figXscale = 8)
+
+dConstructed = aConstructed.copy()
+dConstructed.data -= aObserved.data
+
+dOptCon = aOptimized.copy()
+dOptObs = aOptimized.copy()
+dOptCon.data -= aConstructed.data
+dOptObs.data -= aObserved.data
+plot_cubes_map([dConstructed,dOptCon,dOptObs], 
+             ['constructed - observed', 'optimized - constructed', 'optimized - obsvered'],
+             'brewer_RdYlGn_11',  dalbedoLevels, 'both', 
+             'figs/compare_albedos_diff.png',  'albedo', figXscale = 8)
+
+###############################################
+## Plot Monthly optimized                     ##
+###############################################
+
+plot_cubes_map(mConstructed, monthNames, 'pink',
                  albedoLevels, 'max',
                 'figs/constructed_monthly_albedos.png',
                 'albedo', figXscale = 4)
 
-constructed = albedo.cell(True)
 
-observed = iris.load(Albe_file)[0]
-aobserved = observed.collapsed('time', iris.analysis.MEAN)
-if prePlots:
-    plot_cubes_map([constructed, aobserved], ['constructed', 'observed'], 'pink',
-                   albedoLevels, 'max',
-                  'figs/compare_albedos.png',
-                  'albedo', figXscale = 4)
+plot_cubes_map(mOptimized, monthNames, 'pink',
+               albedoLevels, 'max',
+               'figs/optimized_monthly_albedos.png',
+               'albedo', figXscale = 4)
 
-optimized_alpha_inf = albedo.optimize(observed, dict(zip(tile_lev, alph_grp)), north = 60, south = -60)
+mOptObs = mOptimized.copy()
+mOptObs.data -= observed.data
+plot_cubes_map(mOptObs, monthNames, 'brewer_RdYlGn_11',
+               dalbedoLevels, 'max',
+               'figs/optimized_monthly_albedos_vs_Obs.png',
+               'albedo', figXscale = 4)
 
-
-albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, dict(zip(tile_lev, alph_k))).cell(True)
-
-plot_cubes_map([constructed, albedoOptimized, aobserved], ['constructed', 'optimized', 'observed'], 'pink',  albedoLevels, 'max',  'figs/compare_albedos.png',  'albedo', figXscale = 4)
+mOptCon = mOptimized.copy()
+mOptCon.data -= observed.data
+plot_cubes_map(mOptCon, monthNames, 'brewer_RdYlGn_11',
+               dalbedoLevels, 'max',
+               'figs/optimized_monthly_albedos_vs_Cons.png',
+               'albedo', figXscale = 4)
 
 browser()
