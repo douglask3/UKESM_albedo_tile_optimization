@@ -105,16 +105,34 @@ class Albedo(object):
         para_index = self.Initials(para_index)
         indicies   = np.unique(para_index)
         self.indexInverse = [np.where(indicies == i)[0][0] for i in para_index]
-        start      = self.Initials(self.alpha_inf, index = indicies)
+
+        start_inf  = self.Initials(self.alpha_inf, index = indicies)
+        bounds_inf = [(0.0, 1.0) if i >= 0.0 else (-1.0, -1.0) for i in start_inf]
+    
+        start_k   = self.Initials(self.k        , index = indicies)
+        start_k   = [-1 if i is None else i for i in start_k]
+        bounds_k  = [(0.0, 10.0) if i >= 0.0 else (-1.0, -1.0) for i in start_inf]
+
+        start = start_inf + start_k
+        bounds = bounds_inf + bounds_k
+
+        self.phalf = len(start)/2
         
         observed = ExtractLocation(observed, *args, **kw).cubes
         grid_areas = iris.analysis.cartography.area_weights(observed)
  
-        def minFun(aInf):
+        def minFun(params):
+           
+            aInf = params[:self.phalf]
+            aK   = params[self.phalf:]
+            aK = [None if i < 0 else i for i in aK]
+
             print('----')
             print(aInf)
+            print(aK)
+            
             alpha_inf = self.Initials(aInf, self.indexInverse)
-            k = self.Initials(self.k)
+            k         = self.Initials(aK  , self.indexInverse)
             
             modelled = self.cell(annual = False, alpha_inf = alpha_inf, k = k)
             modelled.data[modelled.data < 0.0] = 0.0
@@ -132,13 +150,19 @@ class Albedo(object):
             return collapsed_cube.data.sum()
         
  
-        bounds = [(0.0, 1.0) if i >= 0.0 else (-1.0, -1.0) for i in start]
-        res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'xtol': 1e-3, 'disp': True})
         
-        alpha_inf = self.Initials(res.x, self.indexInverse)
-        self.alpha_inf = dict(zip( self.frac.coord('pseudo_level').points, alpha_inf))
+        #res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'maxiter': 5, 'xtol': 1e-1, 'disp': True}).x
+        res = [i + 0.1 for i in start]
         
-        return self.alpha_inf
+        alpha_inf = self.Initials(res[:self.phalf], self.indexInverse)
+        k         = self.Initials(res[self.phalf:], self.indexInverse)
+        self.k   = [None if i < 0 else i for i in self.k]   
+
+        tileID = self.frac.coord('pseudo_level').points
+        self.alpha_inf = dict(zip( tileID, alpha_inf))
+        self.k         = dict(zip( tileID, k))     
+
+        return self.alpha_inf, self.k
 
 
 def coord_names(cube):
