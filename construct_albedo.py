@@ -147,7 +147,7 @@ mConstructed = albedo.cell()
 ###############################################
 ## tile albedo
 if prePlots:
-    plot_cubes_map_ordered(albedoConstructed.tiles(), 'pink',
+    plot_cubes_map_ordered(albedo.tiles(), 'pink',
                            albedoLevels, 'max',
                           'figs/constructed_tile_albedos.png',
                           'albedo')
