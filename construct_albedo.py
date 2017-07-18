@@ -45,8 +45,8 @@ dalbedoLevels = [-0.5, -0.2, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.2, 0.5]
 monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
               'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
-prePlots = False
-testOrderPlots = False
+prePlots = True
+testOrderPlots = True
 
 ###############################################
 ## Open data                                 ##
@@ -215,7 +215,7 @@ plot_cubes_map(mOptObs, monthNames, 'brewer_RdYlGn_11',
                'albedo', figXscale = 4)
 
 mOptCon = mOptimized.copy()
-mOptCon.data -= observed.data
+mOptCon.data -= mOptimized.data
 plot_cubes_map(mOptCon, monthNames, 'brewer_RdYlGn_11',
                dalbedoLevels, 'both',
                'figs/optimized_monthly_albedos_vs_Cons.png',
