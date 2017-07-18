@@ -110,19 +110,22 @@ class Albedo(object):
         bounds_inf = [(0.0, 1.0) if i >= 0.0 else (-1.0, -1.0) for i in start_inf]
     
         start_k   = self.Initials(self.k        , index = indicies)
-        start_k   = [-1 if i is None else i for i in start_k]
+        start_k   = [-1.0 if i is None else i for i in start_k]
         bounds_k  = [(0.0, 10.0) if i >= 0.0 else (-1.0, -1.0) for i in start_inf]
 
         start = start_inf + start_k
         bounds = bounds_inf + bounds_k
 
+        self.indexM1 = np.where(np.array(start) == -1.0)[0]
+        
         self.phalf = len(start)/2
         
         observed = ExtractLocation(observed, *args, **kw).cubes
         grid_areas = iris.analysis.cartography.area_weights(observed)
  
         def minFun(params):
-           
+            for i in self.indexM1: params[i] = -1.0
+
             aInf = params[:self.phalf]
             aK   = params[self.phalf:]
             aK = [None if i < 0 else i for i in aK]
@@ -130,6 +133,7 @@ class Albedo(object):
             print('----')
             print(aInf)
             print(aK)
+            if aK[1] is not None: browser()
             
             alpha_inf = self.Initials(aInf, self.indexInverse)
             k         = self.Initials(aK  , self.indexInverse)
@@ -151,7 +155,7 @@ class Albedo(object):
         
  
         
-        res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'xtol': 1e-2, 'disp': True}).x
+        res = minimize(minFun, start, bounds = bounds, method='SLSQP',  options={'xtol': 1e-3, 'disp': True}).x
         #res = [i + 0.1 for i in start]
         
         alpha_inf = self.Initials(res[:self.phalf], self.indexInverse)
