@@ -210,14 +210,14 @@ plot_cubes_map(mOptimized, monthNames, 'pink',
 mOptObs = mOptimized.copy()
 mOptObs.data -= observed.data
 plot_cubes_map(mOptObs, monthNames, 'brewer_RdYlGn_11',
-               dalbedoLevels, 'max',
+               dalbedoLevels, 'both',
                'figs/optimized_monthly_albedos_vs_Obs.png',
                'albedo', figXscale = 4)
 
 mOptCon = mOptimized.copy()
 mOptCon.data -= observed.data
 plot_cubes_map(mOptCon, monthNames, 'brewer_RdYlGn_11',
-               dalbedoLevels, 'max',
+               dalbedoLevels, 'both',
                'figs/optimized_monthly_albedos_vs_Cons.png',
                'albedo', figXscale = 4)
 
