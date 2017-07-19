@@ -111,7 +111,7 @@ class Albedo(object):
     
         start_k   = self.Initials(self.k        , index = indicies)
         start_k   = [-1.0 if i is None else i for i in start_k]
-        bounds_k  = [(0.0, 10.0) if i >= 0.0 else (-1.0, -1.0) for i in start_inf]
+        bounds_k  = [(0.0, 1.386294) if i >= 0.0 else (-1.0, -1.0) for i in start_inf]
 
         start = start_inf + start_k
         bounds = bounds_inf + bounds_k
