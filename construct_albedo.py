@@ -221,4 +221,7 @@ plot_cubes_map(mOptCon, monthNames, 'brewer_RdYlGn_11',
                'figs/optimized_monthly_albedos_vs_Cons.png',
                'albedo', figXscale = 4)
 
+
+plot_cubes_map_ordered(albedo.tiles(), 'pink', albedoLevels, 'max',
+                       'figs/optimized_tile_albedos.png', 'albedo')
 browser()
