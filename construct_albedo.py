@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
+import csv
 
 from   os                import listdir, getcwd, mkdir, path, walk
 from   pylab             import sort
@@ -30,24 +31,6 @@ LAI__file = 'data/qrparm_func_orca1_13_tile.anc'
 slAb_file = 'data/qrparm.soil'
 slAb_varn = 'soil_albedo'
 
-tile_lev = [101 ,102  ,103  ,201  ,202  ,3    ,301  ,302  ,4    ,401  ,402  ,501  ,502  ,6      , 7    , 8         , 9    , 901, 902, 903, 904, 905, 906, 907, 908, 909, 910]
-tile_nme = ['BD','TBE','tBE','NLD','NLE','C3G','C3C','C3P','C4G','C4C','C4P','SHD','SHE','Urban','Lake','Bare Soil','Ice', 'Ice1', 'Ice2', 'Ice3', 'Ice4', 'Ice5', 'Ice6', 'Ice7', 'Ice9', 'Ice9', 'Ice10']
-
-alph_inf = [0.1 ,0.1  ,0.1  ,0.1  ,0.1  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.2  ,0.18   ,0.06  , -1.0       , 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75]
-alph_k   = [0.5 ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,0.5  ,None   ,None  ,None       ,None,None ,None ,None ,None ,None ,None ,None ,None ,None ,None  ]
-
-alph_grp = [101, 101, 101, 201, 201, 3, 3, 3, 3, 3, 3, 501, 501, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,9]
-
-minFracTests = [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
-
-albedoLevels  = [0,  0.1, 0.2, 0.3, 0.4, 0.6, 0.8]
-dalbedoLevels = [-0.5, -0.2, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.2, 0.5]
-monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
-              'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-
-prePlots = False
-testOrderPlots = False
-
 ###############################################
 ## Open data                                 ##
 ###############################################
@@ -56,7 +39,7 @@ tileIndex = frac.coords('pseudo_level')[0].points
 lais    = iris.load(LAI__file)[1]
 soilAlb = iris.load_cube(slAb_file, slAb_varn)
 
-observed = iris.load(Albe_file)[0]
+observed = iris.load(Albe_file)[albIndex]
 mxLAI   = lais.collapsed('time', iris.analysis.MAX)
 
 ###############################################
@@ -118,17 +101,14 @@ def nTilesGT(frac, x, ai, ak):
     cube.data = (cube.data > x) * np
     return cube.collapsed('pseudo_level', iris.analysis.SUM)
 
-
-ntiles = [nTilesGT(frac, i, None, None) for i in minFracTests]
-if prePlots:
+if prePlots:    
+    ntiles = [nTilesGT(frac, i, None, None) for i in minFracTests]
     plot_cubes_map(ntiles, minFracTests, 'brewer_PuBuGn_09',
                    [0, 1, 2, 4, 6, 8], 'max',
                    'figs/nTilesGTx.png',
                    'no. tiles')
 
-ntiles = [nTilesGT(frac, i, j, k) for (i, j, k) in zip(minFracTests, alph_infIndex, alph_kIndex)]
-
-if prePlots:                                                    
+    ntiles = [nTilesGT(frac, i, j, k) for (i, j, k) in zip(minFracTests, alph_infIndex, alph_kIndex)]
     plot_cubes_map(ntiles, minFracTests, 'brewer_RdPu_09',
                    [0, 3, 6, 9, 12], 'max',
                    'figs/nParamsGTx.png',
@@ -137,8 +117,10 @@ if prePlots:
 ###############################################
 ## Albedo construction                       ##
 ###############################################
-albedo = Albedo(frac, lais, soilAlb,
-                dict(zip(tile_lev, alph_inf)), dict(zip(tile_lev, alph_k)))
+alph_inf = dict(zip(tile_lev, alph_inf))
+alph_k   = dict(zip(tile_lev, alph_k)) 
+
+albedo = Albedo(frac, lais, soilAlb,  alph_inf, alph_k)
 
 aConstructed = albedo.cell(True)
 mConstructed = albedo.cell()
@@ -149,7 +131,7 @@ mConstructed = albedo.cell()
 if prePlots:
     plot_cubes_map_ordered(albedo.tiles(), 'pink',
                            albedoLevels, 'max',
-                          'figs/constructed_tile_albedos.png',
+                          'figs/constructed_tile_albedos-' + fnameExt + '.png',
                           'albedo')
  
     
@@ -178,7 +160,7 @@ aOptimized.units = aObserved.units
 
 plot_cubes_map([aConstructed, aOptimized, aObserved], ['constructed', 'optimized', 'observed'], 
                'pink',  albedoLevels, 'max',
-               'figs/compare_albedos.png',  'albedo', figXscale = 8)
+               'figs/compare_albedos-' + fnameExt + '.png',  'albedo', figXscale = 8)
 
 dConstructed = aConstructed.copy()
 dConstructed.data -= aObserved.data
@@ -190,7 +172,7 @@ dOptObs.data -= aObserved.data
 plot_cubes_map([dConstructed,dOptCon,dOptObs], 
              ['constructed - observed', 'optimized - constructed', 'optimized - obsvered'],
              'brewer_RdYlGn_11',  dalbedoLevels, 'both', 
-             'figs/compare_albedos_diff.png',  'albedo', figXscale = 8)
+             'figs/compare_albedos_diff-' + fnameExt + '.png',  'albedo', figXscale = 8)
 
 ###############################################
 ## Plot Monthly optimized                     ##
@@ -198,30 +180,41 @@ plot_cubes_map([dConstructed,dOptCon,dOptObs],
 
 plot_cubes_map(mConstructed, monthNames, 'pink',
                  albedoLevels, 'max',
-                'figs/constructed_monthly_albedos.png',
+                'figs/constructed_monthly_albedos-' + fnameExt + '.png',
                 'albedo', figXscale = 4)
 
 
 plot_cubes_map(mOptimized, monthNames, 'pink',
                albedoLevels, 'max',
-               'figs/optimized_monthly_albedos.png',
+               'figs/optimized_monthly_albedos-' + fnameExt + '.png',
                'albedo', figXscale = 4)
 
 mOptObs = mOptimized.copy()
 mOptObs.data -= observed.data
 plot_cubes_map(mOptObs, monthNames, 'brewer_RdYlGn_11',
                dalbedoLevels, 'both',
-               'figs/optimized_monthly_albedos_vs_Obs.png',
+               'figs/optimized_monthly_albedos_vs_Obs-' + fnameExt + '.png',
                'albedo', figXscale = 4)
 
 mOptCon = mOptimized.copy()
 mOptCon.data -= mOptimized.data
 plot_cubes_map(mOptCon, monthNames, 'brewer_RdYlGn_11',
                dalbedoLevels, 'both',
-               'figs/optimized_monthly_albedos_vs_Cons.png',
+               'figs/optimized_monthly_albedos_vs_Cons-' + fnameExt + '.png',
                'albedo', figXscale = 4)
 
 
 plot_cubes_map_ordered(albedo.tiles(), 'pink', albedoLevels, 'max',
-                       'figs/optimized_tile_albedos.png', 'albedo')
-browser()
+                       'figs/optimized_tile_albedos-' + fnameExt + '.png', 'albedo')
+
+
+params = [[i, alph_inf[i], optimized_alpha_inf[i]] for i in tile_lev]
+params.insert(0, ['tile', 'prior', 'post'])
+
+with open('outputs/params-' + fnameExt + '.csv', "wb") as f:
+    writer = csv.writer(f)
+    writer.writerows(params)
+
+
+
+
