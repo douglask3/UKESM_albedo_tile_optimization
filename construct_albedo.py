@@ -208,12 +208,16 @@ plot_cubes_map_ordered(albedo.tiles(), 'pink', albedoLevels, 'max',
                        'figs/optimized_tile_albedos-' + fnameExt + '.png', 'albedo')
 
 
-params = [[i, alph_inf[i], optimized_alpha_inf[i]] for i in tile_lev]
-params.insert(0, ['tile', 'prior', 'post'])
+def outputParams(prior, post, name):
+    params = [[i, prior[i], post[i]] for i in tile_lev]
+    params.insert(0, ['tile', 'prior', 'post'])
 
-with open('outputs/params-' + fnameExt + '.csv', "wb") as f:
-    writer = csv.writer(f)
-    writer.writerows(params)
+    with open('outputs/' + name + '-' + fnameExt + '.csv', "wb") as f:
+        writer = csv.writer(f)
+        writer.writerows(params)
+
+outputParams(alph_inf, optimized_alpha_inf, 'alpha_inf')
+outputParams(alph_k  , optimized_k        , 'alpha_k'  )
 
 
 
