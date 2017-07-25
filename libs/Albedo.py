@@ -164,7 +164,7 @@ class Albedo(object):
             start.append([start0[0][i] for i in self.antIndex])
             start  = [i for l in start for i in l]
             start  = [-1.0 if i is None else i for i in start]
-            bounds = [(0.0, 1) if i >= 0.0 else (-1.0, -1.0) for i in start]
+            bounds = [(0.01, 1) if i >= 0.0 else (-1.0, -1.0) for i in start]
             
             return start, bounds
 
