@@ -132,7 +132,7 @@ def plotAlbedoByTiles(alb, name):
 
 optimized_alpha_inf, optimized_k = albedo.optimize(observed,
                                         dict(zip(tile_lev, alph_grp)),
-                                         north = 60, south = -90)
+                                         north = 90, south = -90)
 
 albedoOptimized = Albedo(frac, lais, soilAlb, optimized_alpha_inf, optimized_k)
 
