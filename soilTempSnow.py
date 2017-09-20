@@ -24,6 +24,7 @@ tempCode = 'm01s00i024'
 
 git = 'repo: ' + git_info.url + '\n' + 'rev:  ' + git_info.rev
 cmap = plt.cm.YlOrBr_r
+snow_percentiles = range(0, 100, 1)
 
 frac = load_stash_dir(dataDir, fracCode)
 snow = load_stash_dir(dataDir, snowCode)[9]
@@ -39,14 +40,22 @@ z = snow.data.flatten()
 xi = np.linspace(0, 1.1, 110)
 yi = np.linspace(tempMin, tempMax, 121)
 
-def scatterByVegType(i, name):
-    veg = frac[frac.coord('pseudo_level').points == i][0][9]
+def scatterByVegType(i, name, xticks = False, yticks = False):
+    
+    pfts = [np.where(frac.coord('pseudo_level').points == pft)[0][0] for pft in i]
+    veg = iris.cube.CubeList([frac[pft] for pft in pfts]).merge()[0]
+    try:
+        veg = veg.collapsed('pseudo_level', iris.analysis.SUM)
+    except: 
+        pass
+    veg = veg[9]
+    
     x = veg.data.flatten()
     
     #plt.colorbar()  # draw colorbar
     # plot data points.
     col = z.copy()
-    levels = np.percentile(z[z > 0.0], range(0, 100, 1))   
+    levels = np.percentile(z[z > 0.0], snow_percentiles)   
     col[:] = 0.0     
     
     for lev in levels:  col[z > lev] += 100.0/len(levels) 
@@ -59,18 +68,45 @@ def scatterByVegType(i, name):
     plt.scatter(x, y, c = col, cmap = cmap, marker = 'o', linewidth = 0.0)
     plt.xlim(fracMin, fracMax)
     plt.ylim(tempMin, tempMax)
+   
     plt.title(name + '-' + str(i))
-    #m = mpl_cm.ScalarMappable(cmap=plt.cm.coolwarm)
-    #m.set_array(levels)
-    cb = plt.colorbar()
-    cb.set_label('Snow mass %ile')
     plt.grid(True)
-    plt.xlabel('% cover')
-    plt.ylabel('Temperature ($^\circ$C)')
-    plt.show()
+    if not xticks: plt.gca().get_xaxis().set_ticklabels([])
+    if not yticks: plt.gca().get_yaxis().set_ticklabels([])
+    #plt.xlabel('')
+    #plt.ylabel(')
 
+fig = plt.figure()
 
-scatterByVegType(8, 'Bare Soil')
+plt.subplot(4, 2, 1)
+scatterByVegType([3, 301, 302], 'C3 grass', yticks = True)
+
+plt.subplot(4, 2, 3)
+scatterByVegType([4, 401, 402], 'C4 grass', yticks = True)
+
+plt.subplot(4, 2, 5)
+scatterByVegType([3, 301, 302, 4, 401, 402], 'Grass', yticks = True)
+
+plt.subplot(4, 2, 7)
+scatterByVegType([8], 'Bare Soil', xticks = True, yticks = True)
+
+fig.text(0.33, 0.96, 'Global', ha='center', va='center', fontsize = 20)
+fig.text(0.67, 0.96, 'Asia5', ha='center', va='center', fontsize = 20)
+
+fig.text(0.5, 0.04, '% Cover', ha='center', va='center')
+fig.text(0.06, 0.5, 'Temperature ($^\circ$C)', ha='center', va='center', rotation='vertical')
+
+m = mpl_cm.ScalarMappable(cmap = cmap)
+m.set_array(snow_percentiles)
+
+fig.subplots_adjust(right=0.8)
+cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+#fig.colorbar(im, cax=cbar_ax)
+
+cb = fig.colorbar(m, cax=cbar_ax)
+cb.set_label('Snow mass %ile')
+
+plt.show()
 
 browser()
 
