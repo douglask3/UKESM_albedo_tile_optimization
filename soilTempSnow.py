@@ -35,15 +35,13 @@ fracMax = 1.0
 tempMin = -15
 tempMax = 15
 
-y = temp.data.flatten() - 273.15
-z = snow.data.flatten()
 xi = np.linspace(0, 1.1, 110)
 yi = np.linspace(tempMin, tempMax, 121)
 
-def scatterByVegType(i, name, xticks = False, yticks = False):
+def scatterByVegType(zCube, y, z, i, name, xticks = False, yticks = False):
     
-    pfts = [np.where(frac.coord('pseudo_level').points == pft)[0][0] for pft in i]
-    veg = iris.cube.CubeList([frac[pft] for pft in pfts]).merge()[0]
+    pfts = [np.where(zCube.coord('pseudo_level').points == pft)[0][0] for pft in i]
+    veg = iris.cube.CubeList([zCube[pft] for pft in pfts]).merge()[0]
     try:
         veg = veg.collapsed('pseudo_level', iris.analysis.SUM)
     except: 
@@ -76,19 +74,28 @@ def scatterByVegType(i, name, xticks = False, yticks = False):
     #plt.xlabel('')
     #plt.ylabel(')
 
+def pltRegion(plotn = 0, *args, **kw):
+    snowR = ExtractLocation(snow, *args, **kw).cubes
+    tempR = ExtractLocation(temp, *args, **kw).cubes
+    fracR = ExtractLocation(frac, *args, **kw).cubes
+    
+    
+    y = tempR.data.flatten() - 273.15
+    z = snowR.data.flatten()
+
+    def scatterByVegTypeRegion(N, *args, **kw):
+        plt.subplot(4, 2, N + plotn)
+        scatterByVegType(fracR, y, z, *args, **kw)
+        
+    scatterByVegTypeRegion(1, [3, 301, 302], 'C3 grass', yticks = True)
+    scatterByVegTypeRegion(3, [4, 401, 402], 'C4 grass', yticks = True)
+    scatterByVegTypeRegion(5, [3, 301, 302, 4, 401, 402], 'Grass', yticks = True)
+    scatterByVegTypeRegion(7, [8], 'Bare Soil', xticks = True, yticks = True)
+
 fig = plt.figure()
 
-plt.subplot(4, 2, 1)
-scatterByVegType([3, 301, 302], 'C3 grass', yticks = True)
-
-plt.subplot(4, 2, 3)
-scatterByVegType([4, 401, 402], 'C4 grass', yticks = True)
-
-plt.subplot(4, 2, 5)
-scatterByVegType([3, 301, 302, 4, 401, 402], 'Grass', yticks = True)
-
-plt.subplot(4, 2, 7)
-scatterByVegType([8], 'Bare Soil', xticks = True, yticks = True)
+pltRegion(0, east = None, west = None , south = None, north = None)
+pltRegion(1, east = 125.0, west = 55.0, south = 40.0, north = 52.0)
 
 fig.text(0.33, 0.96, 'Global', ha='center', va='center', fontsize = 20)
 fig.text(0.67, 0.96, 'Asia5', ha='center', va='center', fontsize = 20)
