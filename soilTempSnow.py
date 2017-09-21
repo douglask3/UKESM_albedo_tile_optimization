@@ -38,6 +38,8 @@ tempMax = 15
 xi = np.linspace(0, 1.1, 110)
 yi = np.linspace(tempMin, tempMax, 121)
 
+fig_file = 'figs/frac_temp_snow.png'
+
 def scatterByVegType(zCube, y, z, i, name, xticks = False, yticks = False):
     
     pfts = [np.where(zCube.coord('pseudo_level').points == pft)[0][0] for pft in i]
@@ -92,7 +94,7 @@ def pltRegion(plotn = 0, *args, **kw):
     scatterByVegTypeRegion(5, [3, 301, 302, 4, 401, 402], 'Grass', yticks = True)
     scatterByVegTypeRegion(7, [8], 'Bare Soil', xticks = True, yticks = True)
 
-fig = plt.figure()
+fig = plt.figure(figsize = (12,14))
 
 pltRegion(0, east = None, west = None , south = None, north = None)
 pltRegion(1, east = 125.0, west = 55.0, south = 40.0, north = 52.0)
@@ -113,9 +115,8 @@ cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 cb = fig.colorbar(m, cax=cbar_ax)
 cb.set_label('Snow mass %ile')
 
-plt.show()
-
-browser()
+plt.gcf().text(.18, .05, git, fontsize = 8)
+plt.savefig(fig_file, bbox_inches = 'tight')
 
 
 
