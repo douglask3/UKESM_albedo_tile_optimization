@@ -7,30 +7,59 @@ import iris.quickplot as qplt
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-from to_precision import *
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from libs.to_precision import *
 from pdb import set_trace as browser
 from numpy import inf
 import math
 
 from   libs              import git_info
 
+def plot_lonely_cube(cube, N = None, M = None, n = None, levels = [0], extend = 'neither', colourbar = True, *args, **kw):
 
+    cf = plot_cube(cube, N,  M, n, levels = levels, extend = extend, *args, **kw)
+    if colourbar: 
 
+        addColorbar(cf, levels, extend = extend)
+    plt.tight_layout()
+    return cf
+    
+def addColorbar(cf, ticks, *args, **kw):
+    cb = plt.colorbar(cf, orientation='horizontal', ticks = ticks, *args, **kw)
+    cb.ax.set_xticklabels(ticks)
+    return cb
 
-def plot_cube(cube, N, M, n, cmap, levels, extend, projection = ccrs.Robinson()):
-    ax = plt.subplot(N, M, n, projection = projection)
+def plot_cube(cube, N, M, n, cmap, levels, extend = 'neither', projection = ccrs.Robinson(),
+              grayMask = False):
+    
+    if n is None:
+        ax = plt.axes(projection = projection)
+    else:
+        ax = plt.subplot(N, M, n, projection = projection)
+
     ax.set_title(cube.long_name)
 
     cmap = plt.get_cmap(cmap)
     
-    if (extend =='max'): 
-        norm = BoundaryNorm(levels, ncolors=cmap.N - 1)
-    else:
-        norm = BoundaryNorm(levels, ncolors=cmap.N)
     
-    cf = iplt.contourf(cube, levels = levels, cmap = cmap, norm = norm, extend = extend) 
-    #if (n == 5): browser()
+    levelsi = [i for i in levels]
+    
+    if extend == "max" or extend == "both": levelsi += [9E9]
+    if extend == "min" or extend == "both": levelsi = [-9E9] + levelsi
+
+    if extend == "max" or extend == "min":
+        norm = BoundaryNorm(levelsi, ncolors=cmap.N)
+    else:
+        norm = BoundaryNorm(levelsi, ncolors=cmap.N)
+    
+    if grayMask: plt.gca().patch.set_color('.25')
+    try:
+        cf = iplt.pcolormesh(cube, cmap = cmap, norm = norm) 
+    except:
+        cf = iplt.pcolormesh(cube, cmap = cmap) 
+    
     plt.gca().coastlines()
+
     return cf
 
 
@@ -68,17 +97,19 @@ def plot_cubes_map(cubes, nms, cmap, levels, extend = 'neither',
         cf = plot_cube(cubes[i], nx, ny, i + 1, cmapi, levels, extend, *args, **kw)
 
     colorbar_axes = plt.gcf().add_axes([0.15, cbar_yoff + 0.5 / nx, 0.7, 0.15 / nx])
-    colorbar = plt.colorbar(cf, colorbar_axes, orientation='horizontal')
-    colorbar.set_label(units)
-    
-    git = 'rev:  ' + git_info.rev + '\n' + 'repo: ' + git_info.url
-    plt.gcf().text(.05, .95, git, rotation = 270, verticalalignment = "top")
-    
+    cb = addColorbar(cf, levels, colorbar_axes, extend = extend)
+    cb.set_label(units)
+
+    plt.tight_layout()
     if (figName is not None):
         if figName == 'show':
             plt.show()
         else :
             print(figName)
+            git = 'rev:  ' + git_info.rev + '\n' + 'repo: ' + git_info.url
+            plt.gcf().text(.05, .95, git, rotation = 270, verticalalignment = "top")
             plt.savefig(figName, bbox_inches='tight')
             plt.clf()
+
+
 
